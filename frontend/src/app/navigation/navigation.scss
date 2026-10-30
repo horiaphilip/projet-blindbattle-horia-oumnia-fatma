@@ -1,0 +1,35 @@
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+
+  span {
+    color: var(--primary);
+  }
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  a:not(.button) {
+    color: var(--muted);
+    text-decoration: none;
+
+    &.active {
+      color: var(--text);
+    }
+  }
+}
