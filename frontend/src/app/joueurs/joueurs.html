@@ -1,0 +1,25 @@
+<section class="page">
+  <h1>Joueurs</h1>
+
+  @if (loading()) {
+    <p class="message info">Chargement des joueurs...</p>
+  }
+
+  @if (error()) {
+    <p class="message error">Impossible de contacter le serveur.</p>
+  }
+
+  @for (user of users(); track user.id) {
+    <div class="card player">
+      <a [routerLink]="['/profil', user.id]">
+        <strong>{{ user.name }}</strong>
+        <span class="muted">inscrit le {{ user.createdAt | date: 'dd/MM/yyyy' }}</span>
+      </a>
+      <button class="button danger" (click)="deleteUser(user)">Supprimer</button>
+    </div>
+  } @empty {
+    @if (!loading() && !error()) {
+      <p class="muted">Aucun joueur pour le moment.</p>
+    }
+  }
+</section>

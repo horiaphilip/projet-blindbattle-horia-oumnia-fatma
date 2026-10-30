@@ -1,0 +1,39 @@
+<section class="page">
+  <div class="card form-card">
+    <h1>Créer un compte</h1>
+    <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="name">Pseudo</label>
+        <input id="name" type="text" formControlName="name" />
+        @if (
+          inscriptionForm.controls.name.touched &&
+          inscriptionForm.controls.name.hasError('required')
+        ) {
+          <span class="error">Le pseudo est obligatoire</span>
+        }
+        @if (inscriptionForm.controls.name.hasError('maxlength')) {
+          <span class="error">40 caractères maximum</span>
+        }
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" />
+        @if (
+          inscriptionForm.controls.email.touched &&
+          inscriptionForm.controls.email.hasError('required')
+        ) {
+          <span class="error">L'email est obligatoire</span>
+        }
+        @if (inscriptionForm.controls.email.hasError('email')) {
+          <span class="error">L'email n'est pas valide</span>
+        }
+      </div>
+      @if (errorMessage()) {
+        <p class="message error">{{ errorMessage() }}</p>
+      }
+      <button class="button" type="submit" [disabled]="inscriptionForm.invalid || sending()">
+        {{ sending() ? 'Création...' : 'Créer mon compte' }}
+      </button>
+    </form>
+  </div>
+</section>

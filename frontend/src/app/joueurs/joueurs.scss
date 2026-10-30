@@ -1,0 +1,20 @@
+.player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 16px 20px;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    text-decoration: none;
+  }
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}

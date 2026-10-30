@@ -1,0 +1,46 @@
+<section class="page">
+  @if (notFound()) {
+    <p class="message error">Ce joueur n'existe pas.</p>
+    <a routerLink="/joueurs">Retour aux joueurs</a>
+  }
+
+  @if (user(); as user) {
+    <div class="card">
+      <h1>{{ user.name }}</h1>
+      <p class="muted">
+        {{ user.email }} · inscrit le {{ user.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+      </p>
+    </div>
+
+    @if (stats(); as stats) {
+      <div class="stats">
+        <div class="card stat">
+          <span class="value">{{ stats.gamesPlayed }}</span>
+          <span class="label">Parties jouées</span>
+        </div>
+        <div class="card stat">
+          <span class="value">{{ stats.totalScore }}</span>
+          <span class="label">Points au total</span>
+        </div>
+        <div class="card stat">
+          <span class="value">{{ stats.bestScore }}</span>
+          <span class="label">Meilleur score</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Badges</h2>
+        @for (badge of stats.badges; track badge.code) {
+          <div class="badge">
+            <strong>{{ badge.code | badgeLabel }}</strong>
+            <span class="muted">obtenu le {{ badge.earnedAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        } @empty {
+          <p class="muted">Aucun badge pour le moment.</p>
+        }
+      </div>
+    } @else {
+      <p class="message info">Création de ton profil de joueur en cours...</p>
+    }
+  }
+</section>
