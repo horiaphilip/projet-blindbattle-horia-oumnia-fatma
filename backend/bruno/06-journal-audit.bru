@@ -1,0 +1,13 @@
+meta {
+  name: Journal d'audit
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/admin/audit-logs
+}
+
+assert {
+  res.status: 200
+}

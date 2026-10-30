@@ -1,0 +1,13 @@
+meta {
+  name: État de l'outbox
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/admin/outbox
+}
+
+assert {
+  res.status: 200
+}

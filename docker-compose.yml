@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: blindbattle
+      POSTGRES_USER: blindbattle
+      POSTGRES_PASSWORD: blindbattle
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  artemis:
+    image: apache/activemq-artemis:latest-alpine
+    environment:
+      ARTEMIS_USER: artemis
+      ARTEMIS_PASSWORD: artemis
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+
+volumes:
+  postgres-data:

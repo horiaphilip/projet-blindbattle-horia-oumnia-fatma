@@ -1,0 +1,24 @@
+meta {
+  name: Modifier un utilisateur
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/users/{{userId}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Ana Popescu",
+    "email": "ana.popescu@example.com"
+  }
+}
+
+assert {
+  res.status: 200
+}

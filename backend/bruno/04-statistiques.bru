@@ -1,0 +1,14 @@
+meta {
+  name: Statistiques créées par le consommateur JMS
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/users/{{userId}}/stats
+}
+
+assert {
+  res.status: 200
+  res.body.badges[0].code: WELCOME
+}

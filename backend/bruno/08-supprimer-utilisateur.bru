@@ -1,0 +1,13 @@
+meta {
+  name: Supprimer un utilisateur
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/users/{{userId}}
+}
+
+assert {
+  res.status: 204
+}

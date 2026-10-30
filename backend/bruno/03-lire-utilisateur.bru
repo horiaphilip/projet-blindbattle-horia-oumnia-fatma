@@ -1,0 +1,13 @@
+meta {
+  name: Lire un utilisateur
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/users/{{userId}}
+}
+
+assert {
+  res.status: 200
+}
