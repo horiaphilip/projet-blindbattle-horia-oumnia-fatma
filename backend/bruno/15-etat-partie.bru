@@ -1,0 +1,13 @@
+meta {
+  name: État d'une partie
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/games/{{gameCode}}/state
+}
+
+assert {
+  res.status: 200
+}

@@ -1,0 +1,44 @@
+meta {
+  name: Créer une partie
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/games
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "settings": {
+      "answerMode": "QUICK_CHOICE",
+      "guessTarget": "TITLE",
+      "roundCount": 5,
+      "roundSeconds": 20,
+      "difficulty": "EASY",
+      "themeId": "chart-world"
+    }
+  }
+}
+
+assert {
+  res.status: 201
+}
+
+tests {
+  test("conserver le code de la partie", function () {
+    const game = res.getBody();
+    bru.setEnvVar("gameCode", game.code);
+    expect(game.code).to.have.lengthOf(6);
+    expect(game.status).to.equal("LOBBY");
+  });
+}

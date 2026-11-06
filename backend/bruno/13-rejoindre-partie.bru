@@ -1,0 +1,29 @@
+meta {
+  name: Rejoindre une partie
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/games/{{gameCode}}/players
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nickname": "Invité"
+  }
+}
+
+assert {
+  res.status: 201
+}
+
+tests {
+  test("conserver le jeton du joueur", function () {
+    bru.setEnvVar("playerToken", res.getBody().playerToken);
+  });
+}

@@ -1,0 +1,18 @@
+meta {
+  name: Démarrer une partie
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{baseUrl}}/games/{{gameCode}}/start
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: 200
+}
