@@ -6,6 +6,11 @@ meta {
 
 put {
   url: {{baseUrl}}/users/{{userId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 headers {

@@ -2,13 +2,16 @@ package fr.miage.blindbattle.web;
 
 import fr.miage.blindbattle.dto.StatsView;
 import fr.miage.blindbattle.dto.UserRequest;
+import fr.miage.blindbattle.dto.UserUpdateRequest;
 import fr.miage.blindbattle.dto.UserView;
+import fr.miage.blindbattle.security.AuthUser;
 import fr.miage.blindbattle.service.StatsService;
 import fr.miage.blindbattle.service.UserService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +28,9 @@ public class UserController {
     @GetMapping
     public List<UserView> list() { return service.list(); }
 
+    @GetMapping("/me")
+    public UserView me(@AuthenticationPrincipal AuthUser user) { return service.get(user.id()); }
+
     @GetMapping("/{id}")
     public UserView get(@PathVariable("id") long id) { return service.get(id); }
 
@@ -35,13 +41,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserView update(@PathVariable("id") long id, @Valid @RequestBody UserRequest request) {
-        return service.update(id, request);
+    public UserView update(@PathVariable("id") long id, @AuthenticationPrincipal AuthUser user,
+            @Valid @RequestBody UserUpdateRequest request) {
+        return service.update(id, user, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable("id") long id, @AuthenticationPrincipal AuthUser user) {
+        service.delete(id, user);
         return ResponseEntity.noContent().build();
     }
 

@@ -6,6 +6,11 @@ meta {
 
 delete {
   url: {{baseUrl}}/users/{{userId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 assert {

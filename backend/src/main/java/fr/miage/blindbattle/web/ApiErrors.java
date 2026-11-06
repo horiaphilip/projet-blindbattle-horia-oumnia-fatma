@@ -1,6 +1,8 @@
 package fr.miage.blindbattle.web;
 
 import fr.miage.blindbattle.service.EmailAlreadyUsed;
+import fr.miage.blindbattle.service.InvalidCredentials;
+import fr.miage.blindbattle.service.NotOwner;
 import fr.miage.blindbattle.service.StatsNotReady;
 import fr.miage.blindbattle.service.UserNotFound;
 import java.util.LinkedHashMap;
@@ -21,6 +23,16 @@ public class ApiErrors {
     @ExceptionHandler(EmailAlreadyUsed.class)
     public ProblemDetail conflict(EmailAlreadyUsed error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, error.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentials.class)
+    public ProblemDetail unauthorized(InvalidCredentials error) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, error.getMessage());
+    }
+
+    @ExceptionHandler(NotOwner.class)
+    public ProblemDetail forbidden(RuntimeException error) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, error.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,0 +1,33 @@
+meta {
+  name: Se connecter
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "ana@example.com",
+    "password": "motdepasse"
+  }
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("conserver le jeton", function () {
+    const body = res.getBody();
+    bru.setEnvVar("token", body.token);
+    expect(body.token).to.be.a("string");
+    expect(body.user.email).to.equal("ana@example.com");
+  });
+}

@@ -31,7 +31,7 @@ class UserEventsTest {
     @Autowired AuditLogRepository audit;
 
     @Test void userCreatedIsPublishedAndConsumed() {
-        UserView user = users.create(new UserRequest("Ana", "ana.events@example.com"));
+        UserView user = users.create(new UserRequest("Ana", "ana.events@example.com", "motdepasse"));
         await().atMost(Duration.ofSeconds(10)).ignoreExceptions().untilAsserted(() -> {
             assertThat(stats.forUser(user.id()).badges()).extracting("code").containsExactly(UserEventService.WELCOME_BADGE);
             assertThat(outbox.findTop50ByStatusOrderByIdAsc(OutboxStatus.PENDING)).isEmpty();
@@ -39,7 +39,7 @@ class UserEventsTest {
     }
 
     @Test void duplicateEventIsProcessedOnce() {
-        UserView user = users.create(new UserRequest("Lea", "lea.events@example.com"));
+        UserView user = users.create(new UserRequest("Lea", "lea.events@example.com", "motdepasse"));
         await().atMost(Duration.ofSeconds(10)).until(() -> badges.findByUserIdOrderByEarnedAtAsc(user.id()).size() == 1);
         UUID eventId = outbox.findAll().stream()
                 .filter(e -> e.getType().equals("USER_CREATED") && e.getPayload().contains("lea.events@example.com"))
