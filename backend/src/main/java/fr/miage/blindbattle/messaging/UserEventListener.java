@@ -18,7 +18,7 @@ public class UserEventListener {
         this.service = service;
     }
 
-    @JmsListener(destination = Destinations.USER_EVENTS)
+    @JmsListener(destination = Destinations.PREFIX + Destinations.USER_EVENTS)
     public void receive(String body) {
         UserEvent event = mapper.readValue(body, UserEvent.class);
         LOG.info("Reçu {} eventId={} userId={}", event.type(), event.eventId(), event.userId());
