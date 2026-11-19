@@ -35,11 +35,12 @@ public class RoundEntity {
 
     protected RoundEntity() {}
 
-    public RoundEntity(GameEntity game, TrackEntity track, int number) {
+    public RoundEntity(GameEntity game, TrackEntity track, int number, List<Long> choiceTrackIds) {
         this.game = game;
         this.track = track;
         this.number = number;
         this.status = RoundStatus.PENDING;
+        this.choiceTrackIds = new ArrayList<>(choiceTrackIds);
     }
 
     public Long getId() { return id; }

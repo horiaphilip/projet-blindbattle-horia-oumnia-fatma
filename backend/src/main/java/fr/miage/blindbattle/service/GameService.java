@@ -1,5 +1,6 @@
 package fr.miage.blindbattle.service;
 
+import fr.miage.blindbattle.domain.AnswerMode;
 import fr.miage.blindbattle.domain.GameEntity;
 import fr.miage.blindbattle.domain.GameSettings;
 import fr.miage.blindbattle.domain.GameStatus;
@@ -14,6 +15,7 @@ import fr.miage.blindbattle.dto.GameView;
 import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
 import fr.miage.blindbattle.dto.PlayerView;
+import fr.miage.blindbattle.game.DistractorPicker;
 import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.PlayerRepository;
 import fr.miage.blindbattle.repository.RoundRepository;
@@ -37,15 +39,17 @@ public class GameService {
     private final UserRepository users;
     private final CatalogueService catalogue;
     private final GameCodeGenerator codes;
+    private final DistractorPicker distractors;
 
     public GameService(GameRepository games, PlayerRepository players, RoundRepository rounds, UserRepository users,
-            CatalogueService catalogue, GameCodeGenerator codes) {
+            CatalogueService catalogue, GameCodeGenerator codes, DistractorPicker distractors) {
         this.games = games;
         this.players = players;
         this.rounds = rounds;
         this.users = users;
         this.catalogue = catalogue;
         this.codes = codes;
+        this.distractors = distractors;
     }
 
     @Transactional
@@ -77,7 +81,11 @@ public class GameService {
         if (game.getStatus() != GameStatus.LOBBY) throw new GameAlreadyStarted(code);
         if (players.countByGameId(game.getId()) == 0) throw new NoPlayers(code);
         GameSettings settings = game.getSettings();
-        pickTracks(settings).forEach(game::addRound);
+        List<TrackEntity> pool = distinctPool(settings);
+        if (pool.size() < settings.roundCount()) throw new TrackPoolTooSmall(pool.size(), settings.roundCount());
+        List<TrackEntity> shuffled = new ArrayList<>(pool);
+        Collections.shuffle(shuffled, ThreadLocalRandom.current());
+        shuffled.subList(0, settings.roundCount()).forEach(track -> game.addRound(track, choicesFor(track, pool, settings)));
         game.start();
         return state(games.saveAndFlush(game));
     }
@@ -85,13 +93,16 @@ public class GameService {
     @Transactional(readOnly = true)
     public GameStateView state(String code) { return state(required(code)); }
 
-    private List<TrackEntity> pickTracks(GameSettings settings) {
+    private List<TrackEntity> distinctPool(GameSettings settings) {
         Map<Long, TrackEntity> distinct = new LinkedHashMap<>();
         catalogue.pool(settings.themeId(), settings.difficulty()).forEach(t -> distinct.putIfAbsent(t.getDeezerId(), t));
-        if (distinct.size() < settings.roundCount()) throw new TrackPoolTooSmall(distinct.size(), settings.roundCount());
-        List<TrackEntity> shuffled = new ArrayList<>(distinct.values());
-        Collections.shuffle(shuffled, ThreadLocalRandom.current());
-        return shuffled.subList(0, settings.roundCount());
+        return List.copyOf(distinct.values());
+    }
+
+    private List<Long> choicesFor(TrackEntity track, List<TrackEntity> pool, GameSettings settings) {
+        if (settings.answerMode() != AnswerMode.QUICK_CHOICE) return List.of();
+        return distractors.choices(track, pool, settings.guessTarget(), ThreadLocalRandom.current()).tracks().stream()
+                .map(TrackEntity::getId).toList();
     }
 
     private GameStateView state(GameEntity game) {

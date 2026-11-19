@@ -2,6 +2,8 @@ package fr.miage.blindbattle;
 
 import com.jayway.jsonpath.JsonPath;
 import fr.miage.blindbattle.domain.TrackEntity;
+import fr.miage.blindbattle.domain.RoundEntity;
+import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.TrackRepository;
 import fr.miage.blindbattle.service.CatalogueService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,6 +16,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
@@ -30,6 +34,8 @@ class GameApiTest {
 
     @Autowired MockMvc mvc;
     @Autowired TrackRepository tracks;
+    @Autowired GameRepository games;
+    @Autowired TransactionTemplate transaction;
     @MockitoBean CatalogueService catalogue;
 
     @BeforeEach void fillCatalogue() {
@@ -114,6 +120,18 @@ class GameApiTest {
         mvc.perform(post("/games/" + code + "/players").contentType(MediaType.APPLICATION_JSON).content("{\"nickname\":\"Retard\"}"))
             .andExpect(status().isConflict());
         mvc.perform(post("/games/" + code + "/start").header("Authorization", host)).andExpect(status().isConflict());
+    }
+
+    @Test void quickChoiceRoundsGetFourChoicesWithTheAnswer() throws Exception {
+        String host = bearer("Choix");
+        String code = createGame(host, 3);
+        join(code, "Joueur");
+        mvc.perform(post("/games/" + code + "/start").header("Authorization", host)).andExpect(status().isOk());
+        transaction.executeWithoutResult(status -> {
+            for (RoundEntity round : games.findByCode(code).orElseThrow().getRounds()) {
+                assertThat(round.getChoiceTrackIds()).hasSize(4).doesNotHaveDuplicates().contains(round.getTrack().getId());
+            }
+        });
     }
 
     @Test void rejectGameWithMoreRoundsThanTracks() throws Exception {

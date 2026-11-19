@@ -1,5 +1,6 @@
 package fr.miage.blindbattle.web;
 
+import fr.miage.blindbattle.game.NotEnoughTracks;
 import fr.miage.blindbattle.service.EmailAlreadyUsed;
 import fr.miage.blindbattle.service.GameAlreadyStarted;
 import fr.miage.blindbattle.service.GameNotFound;
@@ -27,7 +28,7 @@ public class ApiErrors {
     }
 
     @ExceptionHandler({EmailAlreadyUsed.class, GameAlreadyStarted.class, NicknameTaken.class, NoPlayers.class,
-            TrackPoolTooSmall.class})
+            TrackPoolTooSmall.class, NotEnoughTracks.class})
     public ProblemDetail conflict(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, error.getMessage());
     }

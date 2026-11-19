@@ -55,7 +55,9 @@ public class GameEntity {
 
     public boolean isHost(long userId) { return host.getId() == userId; }
 
-    public void addRound(TrackEntity track) { rounds.add(new RoundEntity(this, track, rounds.size() + 1)); }
+    public void addRound(TrackEntity track, List<Long> choiceTrackIds) {
+        rounds.add(new RoundEntity(this, track, rounds.size() + 1, choiceTrackIds));
+    }
 
     public void start() { this.status = GameStatus.PLAYING; }
 
