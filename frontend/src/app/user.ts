@@ -11,6 +11,22 @@ export interface UserRequest {
   email: string;
 }
 
+export interface SignUpRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
 export interface Badge {
   code: string;
   earnedAt: string;

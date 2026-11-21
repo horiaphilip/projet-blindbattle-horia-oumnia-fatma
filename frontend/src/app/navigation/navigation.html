@@ -5,6 +5,15 @@
       >Accueil</a
     >
     <a routerLink="joueurs" routerLinkActive="active">Joueurs</a>
-    <a class="button" routerLink="inscription">Créer un compte</a>
+    @if (authService.currentUser(); as user) {
+      <a routerLink="profil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        >Mon profil</a
+      >
+      <span class="user-name">{{ user.name }}</span>
+      <button class="button secondary" type="button" (click)="logout()">Déconnexion</button>
+    } @else {
+      <a routerLink="connexion" routerLinkActive="active">Connexion</a>
+      <a class="button" routerLink="inscription">Créer un compte</a>
+    }
   </div>
 </nav>

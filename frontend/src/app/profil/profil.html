@@ -10,6 +10,44 @@
       <p class="muted">
         {{ user.email }} · inscrit le {{ user.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
       </p>
+      @if (isMine() && !editing()) {
+        <button mat-stroked-button type="button" (click)="startEditing()">
+          Modifier mon profil
+        </button>
+      }
+      @if (editing()) {
+        <form class="edit-form" [formGroup]="editForm" (ngSubmit)="saveProfile()">
+          <mat-form-field appearance="outline">
+            <mat-label>Pseudo</mat-label>
+            <input matInput type="text" formControlName="name" />
+            @if (editForm.controls.name.hasError('required')) {
+              <mat-error>Le pseudo est obligatoire</mat-error>
+            }
+            @if (editForm.controls.name.hasError('maxlength')) {
+              <mat-error>40 caractères maximum</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" />
+            @if (editForm.controls.email.hasError('required')) {
+              <mat-error>L'email est obligatoire</mat-error>
+            }
+            @if (editForm.controls.email.hasError('email')) {
+              <mat-error>L'email n'est pas valide</mat-error>
+            }
+          </mat-form-field>
+          @if (editError()) {
+            <p class="message error">{{ editError() }}</p>
+          }
+          <div class="edit-actions">
+            <button mat-flat-button type="submit" [disabled]="editForm.invalid || saving()">
+              {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            <button mat-button type="button" (click)="cancelEditing()">Annuler</button>
+          </div>
+        </form>
+      }
     </div>
 
     @if (stats(); as stats) {

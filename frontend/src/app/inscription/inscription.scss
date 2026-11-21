@@ -6,7 +6,24 @@
     margin-top: 0;
   }
 
-  .button {
-    width: 100%;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
+
+  button {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .message {
+    margin: 0 0 8px;
+  }
+}
+
+.switch {
+  margin: 20px 0 0;
+  color: var(--muted);
+  text-align: center;
 }

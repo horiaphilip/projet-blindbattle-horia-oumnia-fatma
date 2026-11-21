@@ -22,7 +22,17 @@
 .links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+
+  .user-name {
+    color: var(--secondary);
+    font-weight: 600;
+  }
+
+  .button {
+    padding: 8px 18px;
+  }
 
   a:not(.button) {
     color: var(--muted);
