@@ -10,9 +10,11 @@ import fr.miage.blindbattle.service.GameService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/games")
@@ -43,4 +45,7 @@ public class GameController {
 
     @GetMapping("/{code}/state")
     public GameStateView state(@PathVariable("code") String code) { return service.state(code); }
+
+    @GetMapping(value = "/{code}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(@PathVariable("code") String code) { return service.subscribe(code); }
 }

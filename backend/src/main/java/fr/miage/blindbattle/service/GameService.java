@@ -16,6 +16,9 @@ import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
 import fr.miage.blindbattle.dto.PlayerView;
 import fr.miage.blindbattle.game.DistractorPicker;
+import fr.miage.blindbattle.messaging.GameEvent;
+import fr.miage.blindbattle.messaging.GameEventType;
+import fr.miage.blindbattle.messaging.SseBroadcaster;
 import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.PlayerRepository;
 import fr.miage.blindbattle.repository.RoundRepository;
@@ -28,8 +31,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 public class GameService {
@@ -40,9 +45,13 @@ public class GameService {
     private final CatalogueService catalogue;
     private final GameCodeGenerator codes;
     private final DistractorPicker distractors;
+    private final RoundService roundService;
+    private final SseBroadcaster broadcaster;
+    private final ApplicationEventPublisher events;
 
     public GameService(GameRepository games, PlayerRepository players, RoundRepository rounds, UserRepository users,
-            CatalogueService catalogue, GameCodeGenerator codes, DistractorPicker distractors) {
+            CatalogueService catalogue, GameCodeGenerator codes, DistractorPicker distractors, RoundService roundService,
+            SseBroadcaster broadcaster, ApplicationEventPublisher events) {
         this.games = games;
         this.players = players;
         this.rounds = rounds;
@@ -50,6 +59,9 @@ public class GameService {
         this.catalogue = catalogue;
         this.codes = codes;
         this.distractors = distractors;
+        this.roundService = roundService;
+        this.broadcaster = broadcaster;
+        this.events = events;
     }
 
     @Transactional
@@ -71,7 +83,15 @@ public class GameService {
         if (players.existsByGameIdAndNicknameIgnoreCase(game.getId(), nickname)) throw new NicknameTaken(nickname);
         UserEntity account = user == null ? null : users.getReferenceById(user.id());
         PlayerEntity player = players.save(new PlayerEntity(game, account, nickname));
+        events.publishEvent(GameEvent.of(GameEventType.PLAYER_JOINED, code, Map.of("playerId", player.getId(),
+                "nickname", player.getNickname(), "guest", player.isGuest(), "playerCount", players.countByGameId(game.getId()))));
         return new JoinView(player.getId(), player.getNickname(), player.getToken());
+    }
+
+    @Transactional(readOnly = true)
+    public SseEmitter subscribe(String code) {
+        required(code);
+        return broadcaster.subscribe(code);
     }
 
     @Transactional
@@ -87,7 +107,10 @@ public class GameService {
         Collections.shuffle(shuffled, ThreadLocalRandom.current());
         shuffled.subList(0, settings.roundCount()).forEach(track -> game.addRound(track, choicesFor(track, pool, settings)));
         game.start();
-        return state(games.saveAndFlush(game));
+        games.saveAndFlush(game);
+        events.publishEvent(GameEvent.of(GameEventType.GAME_STARTED, code, Map.of("totalRounds", settings.roundCount())));
+        roundService.startNext(code);
+        return state(game);
     }
 
     @Transactional(readOnly = true)
