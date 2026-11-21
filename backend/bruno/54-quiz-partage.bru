@@ -1,0 +1,14 @@
+meta {
+  name: Quiz partagé
+  type: http
+  seq: 54
+}
+
+get {
+  url: {{baseUrl}}/quizzes/shared/{{shareToken}}
+  auth: none
+}
+
+assert {
+  res.status: 200
+}
