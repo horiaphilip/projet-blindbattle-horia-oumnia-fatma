@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 :root {
   --bg: #0f0c1d;
   --surface: #1b1730;
@@ -8,6 +10,20 @@
   --secondary: #3dd6ff;
   --success: #3ddc97;
   --danger: #ff5c5c;
+}
+
+html {
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$magenta-palette,
+        tertiary: mat.$cyan-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
 }
 
 * {

@@ -1,0 +1,48 @@
+<section class="page">
+  <div class="card form-card">
+    <h1>Connexion</h1>
+    <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          type="email"
+          name="email"
+          autocomplete="email"
+          [(ngModel)]="email"
+          #emailField="ngModel"
+          required
+          email
+        />
+        @if (emailField.touched && emailField.hasError('required')) {
+          <mat-error>L'email est obligatoire</mat-error>
+        }
+        @if (emailField.touched && emailField.hasError('email')) {
+          <mat-error>L'email n'est pas valide</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input
+          matInput
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          [(ngModel)]="password"
+          #passwordField="ngModel"
+          required
+        />
+        @if (passwordField.touched && passwordField.hasError('required')) {
+          <mat-error>Le mot de passe est obligatoire</mat-error>
+        }
+      </mat-form-field>
+      @if (errorMessage()) {
+        <p class="message error">{{ errorMessage() }}</p>
+      }
+      <button mat-flat-button type="submit" [disabled]="loginForm.invalid || sending()">
+        {{ sending() ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+    <p class="switch">Pas encore de compte ? <a routerLink="/inscription">Créer un compte</a></p>
+  </div>
+</section>

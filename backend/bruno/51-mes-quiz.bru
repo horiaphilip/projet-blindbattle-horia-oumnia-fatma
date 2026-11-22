@@ -1,0 +1,19 @@
+meta {
+  name: Mes quiz
+  type: http
+  seq: 51
+}
+
+get {
+  url: {{baseUrl}}/quizzes?page=0&size=10
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: 200
+  res.body.totalElements: gte 1
+}

@@ -24,12 +24,18 @@ describe('UserService', () => {
   });
 
   it('should post a new user', () => {
-    service.createUser({ name: 'Ana', email: 'ana@example.com' }).subscribe((user) => {
-      expect(user.id).toBe(1);
-    });
+    service
+      .createUser({ name: 'Ana', email: 'ana@example.com', password: 'motdepasse' })
+      .subscribe((user) => {
+        expect(user.id).toBe(1);
+      });
     const request = httpTesting.expectOne('/api/users');
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ name: 'Ana', email: 'ana@example.com' });
+    expect(request.request.body).toEqual({
+      name: 'Ana',
+      email: 'ana@example.com',
+      password: 'motdepasse',
+    });
     request.flush({ id: 1, name: 'Ana', email: 'ana@example.com', createdAt: '', updatedAt: null });
   });
 

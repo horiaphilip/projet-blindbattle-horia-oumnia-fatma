@@ -1,0 +1,18 @@
+meta {
+  name: Lire un quiz
+  type: http
+  seq: 52
+}
+
+get {
+  url: {{baseUrl}}/quizzes/{{quizId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: 200
+}

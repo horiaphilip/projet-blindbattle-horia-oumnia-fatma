@@ -1,0 +1,32 @@
+meta {
+  name: Modifier un quiz
+  type: http
+  seq: 53
+}
+
+put {
+  url: {{baseUrl}}/quizzes/{{quizId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Tubes des années 2010 (remix)",
+    "description": "Ordre modifié",
+    "visibility": "PUBLIC",
+    "trackIds": [3, 1]
+  }
+}
+
+assert {
+  res.status: 200
+  res.body.visibility: eq PUBLIC
+}
