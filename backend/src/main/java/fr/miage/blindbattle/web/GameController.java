@@ -1,14 +1,18 @@
 package fr.miage.blindbattle.web;
 
+import fr.miage.blindbattle.dto.AnswerAccepted;
+import fr.miage.blindbattle.dto.AnswerRequest;
 import fr.miage.blindbattle.dto.GameRequest;
 import fr.miage.blindbattle.dto.GameStateView;
 import fr.miage.blindbattle.dto.GameView;
 import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
 import fr.miage.blindbattle.security.AuthUser;
+import fr.miage.blindbattle.service.AnswerService;
 import fr.miage.blindbattle.service.GameService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +24,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/games")
 public class GameController {
     private final GameService service;
+    private final AnswerService answers;
 
-    public GameController(GameService service) { this.service = service; }
+    public GameController(GameService service, AnswerService answers) {
+        this.service = service;
+        this.answers = answers;
+    }
 
     @PostMapping
     public ResponseEntity<GameView> create(@AuthenticationPrincipal AuthUser user, @Valid @RequestBody GameRequest request) {
@@ -45,6 +53,13 @@ public class GameController {
 
     @GetMapping("/{code}/state")
     public GameStateView state(@PathVariable("code") String code) { return service.state(code); }
+
+    @PostMapping("/{code}/answers")
+    public ResponseEntity<AnswerAccepted> answer(@PathVariable("code") String code,
+            @RequestHeader(value = "Idempotency-Key", required = false) UUID idempotencyKey,
+            @Valid @RequestBody AnswerRequest request) {
+        return ResponseEntity.accepted().body(answers.submit(code, request, idempotencyKey));
+    }
 
     @GetMapping(value = "/{code}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@PathVariable("code") String code) { return service.subscribe(code); }

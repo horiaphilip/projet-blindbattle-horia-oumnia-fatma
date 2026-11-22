@@ -51,4 +51,11 @@ public class PlayerEntity {
     public Instant getJoinedAt() { return joinedAt; }
     public boolean isGuest() { return guest; }
     public UUID getToken() { return token; }
+
+    public void record(int points, int streak) {
+        this.score += points;
+        this.streak = streak;
+    }
+
+    public void resetStreak() { this.streak = 0; }
 }

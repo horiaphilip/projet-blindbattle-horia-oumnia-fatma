@@ -1,0 +1,24 @@
+meta {
+  name: Répondre à la manche en cours
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/games/{{gameCode}}/answers
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "playerToken": "{{playerToken}}",
+    "choiceIndex": 0
+  }
+}
+
+assert {
+  res.status: 202
+}

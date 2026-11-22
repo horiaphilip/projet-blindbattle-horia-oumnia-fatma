@@ -7,9 +7,14 @@ import fr.miage.blindbattle.service.GameNotFound;
 import fr.miage.blindbattle.service.InvalidCredentials;
 import fr.miage.blindbattle.service.NicknameTaken;
 import fr.miage.blindbattle.service.NoPlayers;
+import fr.miage.blindbattle.service.NoRoundInProgress;
 import fr.miage.blindbattle.service.NotHost;
 import fr.miage.blindbattle.service.NotOwner;
+import fr.miage.blindbattle.service.NotQuizOwner;
+import fr.miage.blindbattle.service.PlayerNotFound;
+import fr.miage.blindbattle.service.QuizNotFound;
 import fr.miage.blindbattle.service.StatsNotReady;
+import fr.miage.blindbattle.service.TrackNotFound;
 import fr.miage.blindbattle.service.TrackPoolTooSmall;
 import fr.miage.blindbattle.service.UserNotFound;
 import java.util.LinkedHashMap;
@@ -22,13 +27,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiErrors {
-    @ExceptionHandler({UserNotFound.class, StatsNotReady.class, GameNotFound.class})
+    @ExceptionHandler({UserNotFound.class, StatsNotReady.class, GameNotFound.class, QuizNotFound.class,
+            TrackNotFound.class, PlayerNotFound.class})
     public ProblemDetail notFound(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, error.getMessage());
     }
 
     @ExceptionHandler({EmailAlreadyUsed.class, GameAlreadyStarted.class, NicknameTaken.class, NoPlayers.class,
-            TrackPoolTooSmall.class, NotEnoughTracks.class})
+            TrackPoolTooSmall.class, NotEnoughTracks.class, NoRoundInProgress.class})
     public ProblemDetail conflict(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, error.getMessage());
     }
@@ -38,7 +44,7 @@ public class ApiErrors {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, error.getMessage());
     }
 
-    @ExceptionHandler({NotOwner.class, NotHost.class})
+    @ExceptionHandler({NotOwner.class, NotHost.class, NotQuizOwner.class})
     public ProblemDetail forbidden(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, error.getMessage());
     }

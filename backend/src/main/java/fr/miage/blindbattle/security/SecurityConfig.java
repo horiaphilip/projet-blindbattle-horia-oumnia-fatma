@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/users", "/auth/login", "/games/*/players").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users", "/auth/login", "/games/*/players", "/games/*/answers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**", "/themes/**", "/artists/**", "/tracks/**",
                                 "/quizzes/shared/**", "/games/**").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**", "/error").permitAll()

@@ -3,6 +3,7 @@ package fr.miage.blindbattle.service;
 import fr.miage.blindbattle.domain.GameEntity;
 import fr.miage.blindbattle.domain.GameSettings;
 import fr.miage.blindbattle.domain.GameStatus;
+import fr.miage.blindbattle.domain.PlayerEntity;
 import fr.miage.blindbattle.domain.RoundEntity;
 import fr.miage.blindbattle.domain.RoundStatus;
 import fr.miage.blindbattle.domain.TrackEntity;
@@ -10,6 +11,7 @@ import fr.miage.blindbattle.game.Choices;
 import fr.miage.blindbattle.game.DistractorPicker;
 import fr.miage.blindbattle.messaging.GameEvent;
 import fr.miage.blindbattle.messaging.GameEventType;
+import fr.miage.blindbattle.repository.AnswerRepository;
 import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.PlayerRepository;
 import fr.miage.blindbattle.repository.RoundRepository;
@@ -29,16 +31,18 @@ public class RoundService {
     private final GameRepository games;
     private final RoundRepository rounds;
     private final PlayerRepository players;
+    private final AnswerRepository answers;
     private final TrackRepository tracks;
     private final DistractorPicker distractors;
     private final RoundScheduler scheduler;
     private final ApplicationEventPublisher events;
 
-    public RoundService(GameRepository games, RoundRepository rounds, PlayerRepository players, TrackRepository tracks,
-            DistractorPicker distractors, RoundScheduler scheduler, ApplicationEventPublisher events) {
+    public RoundService(GameRepository games, RoundRepository rounds, PlayerRepository players, AnswerRepository answers,
+            TrackRepository tracks, DistractorPicker distractors, RoundScheduler scheduler, ApplicationEventPublisher events) {
         this.games = games;
         this.rounds = rounds;
         this.players = players;
+        this.answers = answers;
         this.tracks = tracks;
         this.distractors = distractors;
         this.scheduler = scheduler;
@@ -76,6 +80,11 @@ public class RoundService {
         round.end();
         GameEntity game = round.getGame();
         TrackEntity track = round.getTrack();
+        List<Long> answered = answers.findPlayerIdsByRoundId(roundId);
+        players.findByGameIdOrderByScoreDescJoinedAtAsc(game.getId()).stream()
+                .filter(p -> !answered.contains(p.getId())).forEach(PlayerEntity::resetStreak);
+        String fastest = answers.findFirstByRoundIdAndCorrectnessGreaterThanOrderByResponseMsAsc(roundId, 0)
+                .map(a -> a.getPlayer().getNickname()).orElse(null);
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("roundId", round.getId());
         data.put("roundNumber", round.getNumber());
@@ -83,6 +92,7 @@ public class RoundService {
         data.put("title", track.getTitle());
         data.put("artist", track.getArtist());
         data.put("coverUrl", track.getCoverUrl());
+        data.put("fastest", fastest);
         data.put("leaderboard", leaderboard(game));
         events.publishEvent(GameEvent.of(GameEventType.ROUND_ENDED, game.getCode(), data));
         scheduler.nextRoundAfterPause(game.getCode());
