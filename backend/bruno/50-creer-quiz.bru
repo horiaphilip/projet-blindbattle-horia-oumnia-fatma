@@ -1,0 +1,40 @@
+meta {
+  name: Créer un quiz
+  type: http
+  seq: 50
+}
+
+post {
+  url: {{baseUrl}}/quizzes
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Tubes des années 2010",
+    "description": "Mon premier quiz",
+    "visibility": "PRIVATE",
+    "trackIds": [1, 2, 3]
+  }
+}
+
+assert {
+  res.status: 201
+}
+
+tests {
+  test("conserver le quiz créé", function () {
+    const quiz = res.getBody();
+    bru.setEnvVar("quizId", quiz.id);
+    bru.setEnvVar("shareToken", quiz.shareToken);
+    expect(quiz.tracks[0].position).to.equal(1);
+  });
+}

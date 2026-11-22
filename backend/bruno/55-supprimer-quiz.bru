@@ -1,0 +1,18 @@
+meta {
+  name: Supprimer un quiz
+  type: http
+  seq: 55
+}
+
+delete {
+  url: {{baseUrl}}/quizzes/{{quizId}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: 204
+}
