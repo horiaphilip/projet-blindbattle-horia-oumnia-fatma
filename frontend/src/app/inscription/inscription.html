@@ -2,38 +2,65 @@
   <div class="card form-card">
     <h1>Créer un compte</h1>
     <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
-      <div class="field">
-        <label for="name">Pseudo</label>
-        <input id="name" type="text" formControlName="name" />
-        @if (
-          inscriptionForm.controls.name.touched &&
-          inscriptionForm.controls.name.hasError('required')
-        ) {
-          <span class="error">Le pseudo est obligatoire</span>
+      <mat-form-field appearance="outline">
+        <mat-label>Pseudo</mat-label>
+        <input matInput type="text" formControlName="name" autocomplete="nickname" />
+        @if (inscriptionForm.controls.name.hasError('required')) {
+          <mat-error>Le pseudo est obligatoire</mat-error>
         }
         @if (inscriptionForm.controls.name.hasError('maxlength')) {
-          <span class="error">40 caractères maximum</span>
+          <mat-error>40 caractères maximum</mat-error>
         }
-      </div>
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" type="email" formControlName="email" />
-        @if (
-          inscriptionForm.controls.email.touched &&
-          inscriptionForm.controls.email.hasError('required')
-        ) {
-          <span class="error">L'email est obligatoire</span>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" />
+        @if (inscriptionForm.controls.email.hasError('required')) {
+          <mat-error>L'email est obligatoire</mat-error>
         }
         @if (inscriptionForm.controls.email.hasError('email')) {
-          <span class="error">L'email n'est pas valide</span>
+          <mat-error>L'email n'est pas valide</mat-error>
         }
-      </div>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="new-password" />
+        <mat-hint>8 caractères minimum</mat-hint>
+        @if (inscriptionForm.controls.password.hasError('required')) {
+          <mat-error>Le mot de passe est obligatoire</mat-error>
+        }
+        @if (inscriptionForm.controls.password.hasError('minlength')) {
+          <mat-error>8 caractères minimum</mat-error>
+        }
+        @if (inscriptionForm.controls.password.hasError('maxlength')) {
+          <mat-error>72 caractères maximum</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmer le mot de passe</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+        />
+        @if (inscriptionForm.controls.confirmPassword.hasError('required')) {
+          <mat-error>Confirme ton mot de passe</mat-error>
+        }
+      </mat-form-field>
+      @if (
+        inscriptionForm.hasError('passwordsMismatch') &&
+        inscriptionForm.controls.confirmPassword.touched
+      ) {
+        <p class="message error">Les mots de passe ne correspondent pas</p>
+      }
       @if (errorMessage()) {
         <p class="message error">{{ errorMessage() }}</p>
       }
-      <button class="button" type="submit" [disabled]="inscriptionForm.invalid || sending()">
+      <button mat-flat-button type="submit" [disabled]="inscriptionForm.invalid || sending()">
         {{ sending() ? 'Création...' : 'Créer mon compte' }}
       </button>
     </form>
+    <p class="switch">Déjà un compte ? <a routerLink="/connexion">Se connecter</a></p>
   </div>
 </section>
