@@ -1,0 +1,13 @@
+meta {
+  name: Artistes similaires
+  type: http
+  seq: 34
+}
+
+get {
+  url: {{baseUrl}}/artists/{{artistId}}/related
+}
+
+assert {
+  res.status: 200
+}

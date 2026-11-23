@@ -1,0 +1,26 @@
+meta {
+  name: Détail d'un thème
+  type: http
+  seq: 31
+}
+
+get {
+  url: {{baseUrl}}/themes/chart-fr?difficulty=EASY
+}
+
+params:query {
+  difficulty: EASY
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("morceaux jouables", function () {
+    const detail = res.getBody();
+    expect(detail.difficulty).to.equal("EASY");
+    expect(detail.tracks.length).to.be.above(0);
+    expect(detail.tracks[0].hasPreview).to.equal(true);
+  });
+}

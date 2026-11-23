@@ -1,0 +1,19 @@
+meta {
+  name: Top d'un artiste
+  type: http
+  seq: 33
+}
+
+get {
+  url: {{baseUrl}}/artists/{{artistId}}/top
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("morceaux enregistrés", function () {
+    expect(res.getBody()[0].id).to.be.a("number");
+  });
+}

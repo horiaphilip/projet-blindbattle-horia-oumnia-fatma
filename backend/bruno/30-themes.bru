@@ -1,0 +1,19 @@
+meta {
+  name: Lister les thèmes
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/themes
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("neuf thèmes", function () {
+    expect(res.getBody()).to.have.lengthOf(9);
+  });
+}
