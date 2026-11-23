@@ -1,6 +1,8 @@
 package fr.miage.blindbattle.web;
 
 import fr.miage.blindbattle.game.NotEnoughTracks;
+import fr.miage.blindbattle.integration.deezer.DeezerTrackNotFound;
+import fr.miage.blindbattle.integration.deezer.DeezerUnavailable;
 import fr.miage.blindbattle.service.EmailAlreadyUsed;
 import fr.miage.blindbattle.service.GameAlreadyStarted;
 import fr.miage.blindbattle.service.GameNotFound;
@@ -28,7 +30,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiErrors {
     @ExceptionHandler({UserNotFound.class, StatsNotReady.class, GameNotFound.class, QuizNotFound.class,
-            TrackNotFound.class, PlayerNotFound.class})
+            TrackNotFound.class, PlayerNotFound.class, DeezerTrackNotFound.class})
     public ProblemDetail notFound(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, error.getMessage());
     }
@@ -47,6 +49,11 @@ public class ApiErrors {
     @ExceptionHandler({NotOwner.class, NotHost.class, NotQuizOwner.class})
     public ProblemDetail forbidden(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, error.getMessage());
+    }
+
+    @ExceptionHandler(DeezerUnavailable.class)
+    public ProblemDetail unavailable(DeezerUnavailable error) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, error.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
