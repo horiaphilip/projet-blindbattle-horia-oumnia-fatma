@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BadgeRepository extends JpaRepository<BadgeEntity, Long> {
     List<BadgeEntity> findByUserIdOrderByEarnedAtAsc(Long userId);
+    boolean existsByUserIdAndCode(Long userId, String code);
 }

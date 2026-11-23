@@ -1,0 +1,13 @@
+meta {
+  name: Classement général
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/leaderboard?page=0&size=10
+}
+
+assert {
+  res.status: 200
+}

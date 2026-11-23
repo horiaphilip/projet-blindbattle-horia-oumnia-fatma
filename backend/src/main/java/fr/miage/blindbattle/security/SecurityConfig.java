@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/users", "/auth/login", "/games/*/players", "/games/*/answers").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**", "/themes/**", "/artists/**", "/tracks/**",
+                        .requestMatchers(HttpMethod.GET, "/users/**", "/leaderboard", "/themes/**", "/artists/**", "/tracks/**",
                                 "/quizzes/shared/**", "/games/**").permitAll()
                         .requestMatchers("/admin/**", "/h2-console/**", "/error").permitAll()
                         .anyRequest().authenticated())

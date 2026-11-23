@@ -1,10 +1,13 @@
 package fr.miage.blindbattle.web;
 
+import fr.miage.blindbattle.dto.HistoryEntryView;
+import fr.miage.blindbattle.dto.PageView;
 import fr.miage.blindbattle.dto.StatsView;
 import fr.miage.blindbattle.dto.UserRequest;
 import fr.miage.blindbattle.dto.UserUpdateRequest;
 import fr.miage.blindbattle.dto.UserView;
 import fr.miage.blindbattle.security.AuthUser;
+import fr.miage.blindbattle.service.GameResultService;
 import fr.miage.blindbattle.service.StatsService;
 import fr.miage.blindbattle.service.UserService;
 import jakarta.validation.Valid;
@@ -19,8 +22,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService service;
     private final StatsService stats;
+    private final GameResultService results;
 
-    public UserController(UserService service, StatsService stats) {
+    public UserController(UserService service, StatsService stats, GameResultService results) {
+        this.results = results;
         this.service = service;
         this.stats = stats;
     }
@@ -54,4 +59,11 @@ public class UserController {
 
     @GetMapping("/{id}/stats")
     public StatsView stats(@PathVariable("id") long id) { return stats.forUser(id); }
+
+    @GetMapping("/{id}/history")
+    public PageView<HistoryEntryView> history(@PathVariable("id") long id,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return results.history(id, page, size);
+    }
 }

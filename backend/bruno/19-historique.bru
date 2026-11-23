@@ -1,0 +1,13 @@
+meta {
+  name: Historique d'un joueur
+  type: http
+  seq: 19
+}
+
+get {
+  url: {{baseUrl}}/users/{{userId}}/history?page=0&size=10
+}
+
+assert {
+  res.status: 200
+}

@@ -56,8 +56,8 @@ public class UserEventService {
             audit.save(new AuditLogEntity("USER_CREATED_IGNORED", event.userId(), "Utilisateur supprimé avant le traitement"));
             return;
         }
-        stats.save(new UserStatsEntity(user.get()));
-        badges.save(new BadgeEntity(user.get(), WELCOME_BADGE));
+        if (stats.findByUserId(event.userId()).isEmpty()) stats.save(new UserStatsEntity(user.get()));
+        if (!badges.existsByUserIdAndCode(event.userId(), WELCOME_BADGE)) badges.save(new BadgeEntity(user.get(), WELCOME_BADGE));
         audit.save(new AuditLogEntity("USER_CREATED", event.userId(),
                 "Profil de statistiques et badge de bienvenue créés pour " + event.name()));
         LOG.info("Profil de statistiques créé pour userId={}", event.userId());

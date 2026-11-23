@@ -5,6 +5,7 @@ public final class Destinations {
     public static final String USER_EVENTS = "user.events";
     public static final String GAME_COMMANDS = "game.commands";
     public static final String GAME_EVENTS = "game.events";
+    public static final String PLAYER_RESULTS = "player.results";
 
     private Destinations() {}
 }

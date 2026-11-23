@@ -7,11 +7,14 @@ import fr.miage.blindbattle.dto.GameStateView;
 import fr.miage.blindbattle.dto.GameView;
 import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
+import fr.miage.blindbattle.dto.PodiumEntryView;
 import fr.miage.blindbattle.security.AuthUser;
 import fr.miage.blindbattle.service.AnswerService;
+import fr.miage.blindbattle.service.GameResultService;
 import fr.miage.blindbattle.service.GameService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,10 +28,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class GameController {
     private final GameService service;
     private final AnswerService answers;
+    private final GameResultService results;
 
-    public GameController(GameService service, AnswerService answers) {
+    public GameController(GameService service, AnswerService answers, GameResultService results) {
         this.service = service;
         this.answers = answers;
+        this.results = results;
     }
 
     @PostMapping
@@ -53,6 +58,9 @@ public class GameController {
 
     @GetMapping("/{code}/state")
     public GameStateView state(@PathVariable("code") String code) { return service.state(code); }
+
+    @GetMapping("/{code}/results")
+    public List<PodiumEntryView> results(@PathVariable("code") String code) { return results.podium(code); }
 
     @PostMapping("/{code}/answers")
     public ResponseEntity<AnswerAccepted> answer(@PathVariable("code") String code,

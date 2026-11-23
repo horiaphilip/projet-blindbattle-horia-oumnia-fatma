@@ -14,4 +14,10 @@ public interface AnswerRepository extends JpaRepository<AnswerEntity, Long> {
 
     @Query("select a.player.id from AnswerEntity a where a.round.id = :roundId")
     List<Long> findPlayerIdsByRoundId(@Param("roundId") Long roundId);
+
+    @Query("select count(a) from AnswerEntity a where a.player.id = :playerId and a.correctness = 1")
+    long countCorrectByPlayerId(@Param("playerId") Long playerId);
+
+    @Query("select coalesce(avg(a.responseMs), 0) from AnswerEntity a where a.player.id = :playerId and a.rejectedReason is null")
+    double averageResponseMsByPlayerId(@Param("playerId") Long playerId);
 }

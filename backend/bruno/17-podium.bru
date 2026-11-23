@@ -1,0 +1,13 @@
+meta {
+  name: Podium d'une partie
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{baseUrl}}/games/{{gameCode}}/results
+}
+
+assert {
+  res.status: 200
+}

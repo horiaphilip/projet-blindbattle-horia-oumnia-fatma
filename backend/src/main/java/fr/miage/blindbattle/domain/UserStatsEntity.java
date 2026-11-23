@@ -33,4 +33,10 @@ public class UserStatsEntity {
     public long getTotalScore() { return totalScore; }
     public int getBestScore() { return bestScore; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public void recordGame(int score) {
+        this.gamesPlayed++;
+        this.totalScore += score;
+        this.bestScore = Math.max(bestScore, score);
+    }
 }
