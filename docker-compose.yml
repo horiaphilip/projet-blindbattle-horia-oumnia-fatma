@@ -4,20 +4,66 @@ services:
     environment:
       POSTGRES_DB: blindbattle
       POSTGRES_USER: blindbattle
-      POSTGRES_PASSWORD: blindbattle
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-blindbattle}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blindbattle -d blindbattle"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
 
   artemis:
     image: apache/activemq-artemis:latest-alpine
     environment:
       ARTEMIS_USER: artemis
-      ARTEMIS_PASSWORD: artemis
+      ARTEMIS_PASSWORD: ${ARTEMIS_PASSWORD:-artemis}
     ports:
       - "61616:61616"
       - "8161:8161"
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/blindbattle
+      DB_USER: blindbattle
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-blindbattle}
+      JMS_URL: tcp://artemis:61616
+      JMS_USER: artemis
+      JMS_PASSWORD: ${ARTEMIS_PASSWORD:-artemis}
+      JWT_SECRET: ${JWT_SECRET:-blindbattle-docker-secret-change-me-on-the-server-2026}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      artemis:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    environment:
+      DOMAIN: ${DOMAIN:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy-data:/data
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://frontend:80
+    depends_on:
+      - frontend
+    profiles:
+      - tunnel
 
 volumes:
   postgres-data:
+  caddy-data:
