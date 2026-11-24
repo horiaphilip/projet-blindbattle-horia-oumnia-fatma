@@ -8,6 +8,7 @@ import fr.miage.blindbattle.dto.GameView;
 import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
 import fr.miage.blindbattle.dto.PodiumEntryView;
+import fr.miage.blindbattle.dto.PreviewView;
 import fr.miage.blindbattle.security.AuthUser;
 import fr.miage.blindbattle.service.AnswerService;
 import fr.miage.blindbattle.service.GameResultService;
@@ -58,6 +59,11 @@ public class GameController {
 
     @GetMapping("/{code}/state")
     public GameStateView state(@PathVariable("code") String code) { return service.state(code); }
+
+    @GetMapping("/{code}/rounds/current/preview")
+    public PreviewView preview(@PathVariable("code") String code, @AuthenticationPrincipal AuthUser user) {
+        return service.preview(code, user);
+    }
 
     @GetMapping("/{code}/results")
     public List<PodiumEntryView> results(@PathVariable("code") String code) { return results.podium(code); }

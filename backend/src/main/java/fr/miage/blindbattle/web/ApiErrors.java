@@ -6,6 +6,7 @@ import fr.miage.blindbattle.integration.deezer.DeezerUnavailable;
 import fr.miage.blindbattle.service.EmailAlreadyUsed;
 import fr.miage.blindbattle.service.GameAlreadyStarted;
 import fr.miage.blindbattle.service.GameNotFound;
+import fr.miage.blindbattle.service.GameSourceMissing;
 import fr.miage.blindbattle.service.InvalidCredentials;
 import fr.miage.blindbattle.service.NicknameTaken;
 import fr.miage.blindbattle.service.NoPlayers;
@@ -58,8 +59,8 @@ public class ApiErrors {
         return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, error.getMessage());
     }
 
-    @ExceptionHandler(SearchTooShort.class)
-    public ProblemDetail badRequest(SearchTooShort error) {
+    @ExceptionHandler({SearchTooShort.class, GameSourceMissing.class})
+    public ProblemDetail badRequest(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, error.getMessage());
     }
 

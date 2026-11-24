@@ -6,6 +6,7 @@ import fr.miage.blindbattle.domain.RoundEntity;
 import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.TrackRepository;
 import fr.miage.blindbattle.service.CatalogueService;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,6 +46,7 @@ class GameApiTest {
                     new TrackEntity(1000 + i, "Titre " + i, "Artiste " + i, i, "Album", null, i * 1000, 30, true)));
         }
         when(catalogue.pool(anyString(), any())).thenAnswer(invocation -> tracks.findAll());
+        when(catalogue.freshPreview(anyLong())).thenAnswer(invocation -> "https://cdn.example/" + invocation.getArgument(0) + ".mp3");
     }
 
     @Test void hostCreatesGame() throws Exception {
@@ -159,14 +162,95 @@ class GameApiTest {
         mvc.perform(get("/games/" + code)).andExpect(status().isNotFound());
     }
 
+    @Test void rejectGameWithoutThemeOrQuiz() throws Exception {
+        mvc.perform(post("/games").header("Authorization", bearer("Vide")).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"settings\":{\"answerMode\":\"QUICK_CHOICE\",\"guessTarget\":\"TITLE\",\"roundCount\":3,"
+                        + "\"roundSeconds\":20,\"difficulty\":\"EASY\"}}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.detail").value("Choisissez un thème ou un quiz"));
+    }
+
+    @Test void quizGamePlaysTheQuizTracksInOrder() throws Exception {
+        String host = bearer("Createur");
+        List<Long> ids = trackIds();
+        List<Long> order = List.of(ids.get(3), ids.get(0), ids.get(4), ids.get(1));
+        long quizId = createQuiz(host, "PRIVATE", order);
+        String code = createGame(host, quizSettings(quizId, 3));
+        join(code, "Joueur");
+        mvc.perform(post("/games/" + code + "/start").header("Authorization", host)).andExpect(status().isOk());
+        transaction.executeWithoutResult(status -> assertThat(games.findByCode(code).orElseThrow().getRounds())
+                .extracting(round -> round.getTrack().getId()).containsExactlyElementsOf(order.subList(0, 3)));
+    }
+
+    @Test void privateQuizOfAnotherUserCannotBePlayed() throws Exception {
+        long privateQuiz = createQuiz(bearer("Prive"), "PRIVATE", trackIds().subList(0, 4));
+        long publicQuiz = createQuiz(bearer("Public"), "PUBLIC", trackIds().subList(0, 4));
+        String other = bearer("Autre");
+        mvc.perform(post("/games").header("Authorization", other).contentType(MediaType.APPLICATION_JSON)
+                .content(quizSettings(privateQuiz, 3)))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/games").header("Authorization", other).contentType(MediaType.APPLICATION_JSON)
+                .content(quizSettings(publicQuiz, 3)))
+            .andExpect(status().isCreated());
+        mvc.perform(post("/games").header("Authorization", other).contentType(MediaType.APPLICATION_JSON)
+                .content(quizSettings(999999, 3)))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test void quizShorterThanRoundCountCannotStart() throws Exception {
+        String host = bearer("Court");
+        String code = createGame(host, quizSettings(createQuiz(host, "PRIVATE", trackIds().subList(0, 4)), 5));
+        join(code, "Joueur");
+        mvc.perform(post("/games/" + code + "/start").header("Authorization", host))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.detail").value(containsString("4 disponibles")));
+    }
+
+    @Test void onlyHostGetsTheCurrentPreview() throws Exception {
+        String host = bearer("Platine");
+        String code = createGame(host, 3);
+        join(code, "Joueur");
+        mvc.perform(get("/games/" + code + "/rounds/current/preview").header("Authorization", host))
+            .andExpect(status().isConflict());
+        mvc.perform(post("/games/" + code + "/start").header("Authorization", host)).andExpect(status().isOk());
+        long deezerId = transaction.execute(status -> games.findByCode(code).orElseThrow().getRounds().getFirst()
+                .getTrack().getDeezerId());
+        mvc.perform(get("/games/" + code + "/rounds/current/preview").header("Authorization", host))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.roundNumber").value(1))
+            .andExpect(jsonPath("$.previewUrl").value("https://cdn.example/" + deezerId + ".mp3"));
+        mvc.perform(get("/games/" + code + "/rounds/current/preview").header("Authorization", bearer("Curieux")))
+            .andExpect(status().isForbidden());
+        mvc.perform(get("/games/" + code + "/rounds/current/preview")).andExpect(status().isForbidden());
+    }
+
+    private List<Long> trackIds() {
+        return tracks.findAll().stream().map(TrackEntity::getId).sorted().toList();
+    }
+
+    private long createQuiz(String owner, String visibility, List<Long> trackIds) throws Exception {
+        String ids = String.join(",", trackIds.stream().map(String::valueOf).toList());
+        String body = mvc.perform(post("/quizzes").header("Authorization", owner).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Mon quiz\",\"visibility\":\"" + visibility + "\",\"trackIds\":[" + ids + "]}"))
+            .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        return ((Number) JsonPath.read(body, "$.id")).longValue();
+    }
+
+    private String quizSettings(long quizId, int roundCount) {
+        return "{\"settings\":{\"answerMode\":\"QUICK_CHOICE\",\"guessTarget\":\"TITLE\",\"roundCount\":" + roundCount
+                + ",\"roundSeconds\":20,\"difficulty\":\"EASY\",\"quizId\":" + quizId + "}}";
+    }
+
     private String settings(int roundCount) {
         return "{\"settings\":{\"answerMode\":\"QUICK_CHOICE\",\"guessTarget\":\"TITLE\",\"roundCount\":" + roundCount
                 + ",\"roundSeconds\":20,\"difficulty\":\"EASY\",\"themeId\":\"chart-world\"}}";
     }
 
-    private String createGame(String host, int roundCount) throws Exception {
+    private String createGame(String host, int roundCount) throws Exception { return createGame(host, settings(roundCount)); }
+
+    private String createGame(String host, String settings) throws Exception {
         String body = mvc.perform(post("/games").header("Authorization", host).contentType(MediaType.APPLICATION_JSON)
-                .content(settings(roundCount)))
+                .content(settings))
             .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         return JsonPath.read(body, "$.code");
     }

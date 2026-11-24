@@ -5,6 +5,8 @@ import fr.miage.blindbattle.domain.GameEntity;
 import fr.miage.blindbattle.domain.GameSettings;
 import fr.miage.blindbattle.domain.GameStatus;
 import fr.miage.blindbattle.domain.PlayerEntity;
+import fr.miage.blindbattle.domain.QuizEntity;
+import fr.miage.blindbattle.domain.QuizTrackEntity;
 import fr.miage.blindbattle.domain.RoundEntity;
 import fr.miage.blindbattle.domain.RoundStatus;
 import fr.miage.blindbattle.domain.TrackEntity;
@@ -15,12 +17,14 @@ import fr.miage.blindbattle.dto.GameView;
 import fr.miage.blindbattle.dto.JoinRequest;
 import fr.miage.blindbattle.dto.JoinView;
 import fr.miage.blindbattle.dto.PlayerView;
+import fr.miage.blindbattle.dto.PreviewView;
 import fr.miage.blindbattle.game.DistractorPicker;
 import fr.miage.blindbattle.messaging.GameEvent;
 import fr.miage.blindbattle.messaging.GameEventType;
 import fr.miage.blindbattle.messaging.SseBroadcaster;
 import fr.miage.blindbattle.repository.GameRepository;
 import fr.miage.blindbattle.repository.PlayerRepository;
+import fr.miage.blindbattle.repository.QuizRepository;
 import fr.miage.blindbattle.repository.RoundRepository;
 import fr.miage.blindbattle.repository.UserRepository;
 import fr.miage.blindbattle.security.AuthUser;
@@ -42,6 +46,7 @@ public class GameService {
     private final PlayerRepository players;
     private final RoundRepository rounds;
     private final UserRepository users;
+    private final QuizRepository quizzes;
     private final CatalogueService catalogue;
     private final GameCodeGenerator codes;
     private final DistractorPicker distractors;
@@ -50,12 +55,13 @@ public class GameService {
     private final ApplicationEventPublisher events;
 
     public GameService(GameRepository games, PlayerRepository players, RoundRepository rounds, UserRepository users,
-            CatalogueService catalogue, GameCodeGenerator codes, DistractorPicker distractors, RoundService roundService,
+            QuizRepository quizzes, CatalogueService catalogue, GameCodeGenerator codes, DistractorPicker distractors, RoundService roundService,
             SseBroadcaster broadcaster, ApplicationEventPublisher events) {
         this.games = games;
         this.players = players;
         this.rounds = rounds;
         this.users = users;
+        this.quizzes = quizzes;
         this.catalogue = catalogue;
         this.codes = codes;
         this.distractors = distractors;
@@ -67,6 +73,7 @@ public class GameService {
     @Transactional
     public GameView create(AuthUser host, GameRequest request) {
         UserEntity user = users.findById(host.id()).orElseThrow(() -> new UserNotFound(host.id()));
+        checkSource(request.settings(), host);
         String code = codes.next();
         while (games.existsByCode(code)) code = codes.next();
         return view(games.save(new GameEntity(code, user, request.settings())));
@@ -103,9 +110,9 @@ public class GameService {
         GameSettings settings = game.getSettings();
         List<TrackEntity> pool = distinctPool(settings);
         if (pool.size() < settings.roundCount()) throw new TrackPoolTooSmall(pool.size(), settings.roundCount());
-        List<TrackEntity> shuffled = new ArrayList<>(pool);
-        Collections.shuffle(shuffled, ThreadLocalRandom.current());
-        shuffled.subList(0, settings.roundCount()).forEach(track -> game.addRound(track, choicesFor(track, pool, settings)));
+        List<TrackEntity> ordered = new ArrayList<>(pool);
+        if (!settings.fromQuiz()) Collections.shuffle(ordered, ThreadLocalRandom.current());
+        ordered.subList(0, settings.roundCount()).forEach(track -> game.addRound(track, choicesFor(track, pool, settings)));
         game.start();
         games.saveAndFlush(game);
         events.publishEvent(GameEvent.of(GameEventType.GAME_STARTED, code, Map.of("totalRounds", settings.roundCount())));
@@ -116,10 +123,35 @@ public class GameService {
     @Transactional(readOnly = true)
     public GameStateView state(String code) { return state(required(code)); }
 
+    @Transactional(readOnly = true)
+    public PreviewView preview(String code, AuthUser host) {
+        GameEntity game = required(code);
+        if (host == null || !game.isHost(host.id())) throw new NotHost();
+        RoundEntity round = rounds.findFirstByGameIdAndStatusOrderByNumberAsc(game.getId(), RoundStatus.PLAYING)
+                .orElseThrow(() -> new NoRoundInProgress(code));
+        return new PreviewView(round.getId(), round.getNumber(), catalogue.freshPreview(round.getTrack().getDeezerId()));
+    }
+
+    private void checkSource(GameSettings settings, AuthUser host) {
+        if (settings.fromQuiz()) {
+            QuizEntity quiz = quiz(settings.quizId());
+            if (!quiz.isPublic() && !quiz.isOwnedBy(host.id())) throw new NotQuizOwner();
+        } else if (settings.themeId() == null || settings.themeId().isBlank()) {
+            throw new GameSourceMissing();
+        }
+    }
+
+    private QuizEntity quiz(long id) { return quizzes.findWithTracksById(id).orElseThrow(() -> new QuizNotFound(id)); }
+
     private List<TrackEntity> distinctPool(GameSettings settings) {
         Map<Long, TrackEntity> distinct = new LinkedHashMap<>();
-        catalogue.pool(settings.themeId(), settings.difficulty()).forEach(t -> distinct.putIfAbsent(t.getDeezerId(), t));
+        source(settings).forEach(t -> distinct.putIfAbsent(t.getDeezerId(), t));
         return List.copyOf(distinct.values());
+    }
+
+    private List<TrackEntity> source(GameSettings settings) {
+        if (!settings.fromQuiz()) return catalogue.pool(settings.themeId(), settings.difficulty());
+        return quiz(settings.quizId()).getTracks().stream().map(QuizTrackEntity::getTrack).filter(TrackEntity::hasPreview).toList();
     }
 
     private List<Long> choicesFor(TrackEntity track, List<TrackEntity> pool, GameSettings settings) {

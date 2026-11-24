@@ -1,0 +1,19 @@
+meta {
+  name: Extrait audio de la manche en cours
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/games/{{gameCode}}/rounds/current/preview
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: 200
+  res.body.previewUrl: isString
+}
