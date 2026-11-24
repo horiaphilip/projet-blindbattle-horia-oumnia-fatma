@@ -1,0 +1,41 @@
+<section class="page">
+  <div class="header">
+    <h1>Mes quiz</h1>
+    <a class="button" routerLink="/quiz/nouveau">Nouveau quiz</a>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="message error">{{ errorMessage() }}</p>
+  }
+
+  @if (quizzes(); as quizzes) {
+    @for (quiz of quizzes.content; track quiz.id) {
+      <div class="card quiz">
+        <div class="details">
+          <strong>{{ quiz.title }}</strong>
+          <span class="muted">
+            {{ quiz.trackCount }} {{ quiz.trackCount > 1 ? 'morceaux' : 'morceau' }} ·
+            {{ quiz.visibility === 'PUBLIC' ? 'Public' : 'Privé' }} · créé le
+            {{ quiz.createdAt | date: 'dd/MM/yyyy' }}
+          </span>
+        </div>
+        <div class="actions">
+          <a class="button secondary edit" [routerLink]="['/quiz', quiz.id, 'edit']">Modifier</a>
+          <button class="button secondary share" type="button" (click)="copyShareLink(quiz)">
+            Copier le lien de partage
+          </button>
+          <button class="button danger" type="button" (click)="deleteQuiz(quiz)">Supprimer</button>
+        </div>
+      </div>
+    } @empty {
+      <p class="muted">Aucun quiz pour l'instant.</p>
+    }
+    <app-pagination
+      [page]="quizzes.page"
+      [totalPages]="quizzes.totalPages"
+      (pageChange)="loadPage($event)"
+    ></app-pagination>
+  } @else if (!errorMessage()) {
+    <p class="message info">Chargement de tes quiz...</p>
+  }
+</section>

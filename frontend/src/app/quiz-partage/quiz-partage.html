@@ -1,0 +1,37 @@
+<section class="page">
+  @if (quiz(); as quiz) {
+    <div class="card">
+      <h1>{{ quiz.title }}</h1>
+      <p class="muted">
+        Par {{ quiz.ownerName }} · {{ quiz.trackCount }}
+        {{ quiz.trackCount > 1 ? 'morceaux' : 'morceau' }}
+      </p>
+      @if (quiz.description) {
+        <p class="description">{{ quiz.description }}</p>
+      }
+      <ol class="tracks">
+        @for (track of quiz.tracks; track track.trackId) {
+          <li class="track">
+            <span class="muted">{{ track.position }}</span>
+            @if (track.coverUrl) {
+              <img [src]="track.coverUrl" alt="" />
+            }
+            <div class="details">
+              <strong>{{ track.title }}</strong>
+              <span class="muted">{{ track.artist }}</span>
+              @if (!track.hasPreview) {
+                <span class="no-preview">pas d'extrait</span>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="muted">Ce quiz ne contient aucun morceau.</li>
+        }
+      </ol>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="message error">{{ errorMessage() }}</p>
+  } @else {
+    <p class="message info">Chargement du quiz...</p>
+  }
+</section>
