@@ -32,6 +32,7 @@ describe('Navigation', () => {
   it('should show Connexion when logged out', () => {
     const text: string = fixture.nativeElement.textContent;
     expect(text).toContain('Connexion');
+    expect(text).toContain('Classement');
     expect(text).not.toContain('Déconnexion');
   });
 

@@ -1,0 +1,21 @@
+@if (totalPages > 1) {
+  <nav class="pagination" aria-label="Pagination">
+    <button
+      class="button secondary previous"
+      type="button"
+      [disabled]="page <= 0"
+      (click)="previous()"
+    >
+      Précédent
+    </button>
+    <span class="position">Page {{ page + 1 }} / {{ totalPages }}</span>
+    <button
+      class="button secondary next"
+      type="button"
+      [disabled]="page >= totalPages - 1"
+      (click)="next()"
+    >
+      Suivant
+    </button>
+  </nav>
+}

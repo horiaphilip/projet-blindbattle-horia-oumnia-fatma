@@ -1,0 +1,16 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.button {
+  padding: 8px 18px;
+}
+
+.position {
+  color: var(--muted);
+}

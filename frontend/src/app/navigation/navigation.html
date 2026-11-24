@@ -5,6 +5,7 @@
       >Accueil</a
     >
     <a routerLink="joueurs" routerLinkActive="active">Joueurs</a>
+    <a routerLink="classement" routerLinkActive="active">Classement</a>
     @if (authService.currentUser(); as user) {
       <a routerLink="profil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         >Mon profil</a

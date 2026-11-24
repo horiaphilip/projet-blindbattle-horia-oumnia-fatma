@@ -10,8 +10,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../auth-service';
 import { BadgeLabelPipe } from '../badge-label-pipe';
+import { Pagination } from '../pagination/pagination';
+import { ScoreChart } from '../score-chart/score-chart';
+import { HistoryEntry, Page } from '../stats';
+import { StatsService } from '../stats-service';
 import { Stats, User } from '../user';
 import { UserService } from '../user-service';
+
+const HISTORY_SIZE = 10;
 
 @Component({
   selector: 'app-profil',
@@ -19,6 +25,8 @@ import { UserService } from '../user-service';
     DatePipe,
     RouterLink,
     BadgeLabelPipe,
+    Pagination,
+    ScoreChart,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -30,6 +38,9 @@ import { UserService } from '../user-service';
 export class Profil implements OnInit, OnDestroy {
   public user = signal<User | null>(null);
   public stats = signal<Stats | null>(null);
+  public history = signal<Page<HistoryEntry> | null>(null);
+  public recentGames = signal<HistoryEntry[]>([]);
+  public historyError = signal<boolean>(false);
   public notFound = signal<boolean>(false);
   public editing = signal<boolean>(false);
   public saving = signal<boolean>(false);
@@ -37,6 +48,12 @@ export class Profil implements OnInit, OnDestroy {
   public isMine = computed(() => {
     const user = this.user();
     return user !== null && user.id === this.authService.currentUser()?.id;
+  });
+  public averageScore = computed(() => {
+    const stats = this.stats();
+    return stats !== null && stats.gamesPlayed > 0
+      ? Math.round(stats.totalScore / stats.gamesPlayed)
+      : 0;
   });
   public editForm = new FormGroup({
     name: new FormControl('', {
@@ -49,10 +66,12 @@ export class Profil implements OnInit, OnDestroy {
     }),
   });
   private statsSubscription: Subscription | null = null;
+  private historySubscription: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
+    private statsService: StatsService,
     private authService: AuthService,
     private snackBar: MatSnackBar,
   ) {}
@@ -68,6 +87,7 @@ export class Profil implements OnInit, OnDestroy {
       next: (user) => {
         this.user.set(user);
         this.waitForStats(id);
+        this.loadHistory(id, 0);
       },
       error: () => this.notFound.set(true),
     });
@@ -75,6 +95,25 @@ export class Profil implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.statsSubscription?.unsubscribe();
+    this.historySubscription?.unsubscribe();
+  }
+
+  public loadHistory(id: number, page: number) {
+    this.historySubscription?.unsubscribe();
+    this.historyError.set(false);
+    this.historySubscription = this.statsService.getHistory(id, page, HISTORY_SIZE).subscribe({
+      next: (history) => {
+        this.history.set(history);
+        if (history.page === 0) {
+          this.recentGames.set(history.content);
+        }
+      },
+      error: () => this.historyError.set(true),
+    });
+  }
+
+  public rankLabel(rank: number): string {
+    return rank === 1 ? '1er' : rank + 'e';
   }
 
   public startEditing() {

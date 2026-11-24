@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Accueil } from './accueil/accueil';
 import { authGuard } from './auth-guard';
+import { Classement } from './classement/classement';
 import { Connexion } from './connexion/connexion';
 import { Inscription } from './inscription/inscription';
 import { Joueurs } from './joueurs/joueurs';
@@ -9,6 +10,7 @@ import { Profil } from './profil/profil';
 
 export const routes: Routes = [
   { path: '', component: Accueil },
+  { path: 'classement', component: Classement },
   { path: 'connexion', component: Connexion },
   { path: 'inscription', component: Inscription },
   { path: 'joueurs', component: Joueurs },
