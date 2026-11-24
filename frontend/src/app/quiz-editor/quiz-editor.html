@@ -1,0 +1,143 @@
+<section class="page">
+  <h1>{{ quizId() === null ? 'Nouveau quiz' : 'Modifier le quiz' }}</h1>
+
+  @if (loadError()) {
+    <p class="message error">{{ loadError() }}</p>
+    <a routerLink="/mes-quiz">Retour à mes quiz</a>
+  } @else if (loading()) {
+    <p class="message info">Chargement du quiz...</p>
+  } @else {
+    <form id="quiz-form" class="card form" [formGroup]="quizForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Titre</mat-label>
+        <input matInput type="text" formControlName="title" />
+        @if (
+          quizForm.controls.title.hasError('required') ||
+          quizForm.controls.title.hasError('pattern')
+        ) {
+          <mat-error>Le titre est obligatoire</mat-error>
+        }
+        @if (quizForm.controls.title.hasError('maxlength')) {
+          <mat-error>60 caractères maximum</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput rows="3" formControlName="description"></textarea>
+        @if (quizForm.controls.description.hasError('maxlength')) {
+          <mat-error>300 caractères maximum</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Visibilité</mat-label>
+        <select matNativeControl formControlName="visibility">
+          <option value="PRIVATE">Privé</option>
+          <option value="PUBLIC">Public</option>
+        </select>
+      </mat-form-field>
+    </form>
+
+    <div class="card">
+      <h2>Ajouter des morceaux</h2>
+      <mat-form-field class="search" appearance="outline">
+        <mat-label>Rechercher un titre ou un artiste</mat-label>
+        <input matInput type="search" [formControl]="searchControl" />
+      </mat-form-field>
+      @if (searchError()) {
+        <p class="message error">{{ searchError() }}</p>
+      }
+      @if (searching()) {
+        <p class="message info">Recherche en cours...</p>
+      } @else if (results(); as results) {
+        <ul class="tracks results">
+          @for (result of results; track result.id) {
+            <li class="track">
+              @if (result.coverUrl) {
+                <img [src]="result.coverUrl" alt="" />
+              }
+              <div class="details">
+                <strong>{{ result.title }}</strong>
+                <span class="muted">
+                  {{ result.artist }} · {{ duration(result.durationSeconds) }}
+                </span>
+                @if (!result.hasPreview) {
+                  <span class="no-preview">pas d'extrait</span>
+                }
+              </div>
+              <button
+                class="button secondary add"
+                type="button"
+                [disabled]="isSelected(result.id) || isFull()"
+                (click)="addTrack(result)"
+              >
+                {{ isSelected(result.id) ? 'Ajouté' : 'Ajouter' }}
+              </button>
+            </li>
+          } @empty {
+            <li class="muted">Aucun morceau trouvé.</li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="card">
+      <h2>Morceaux du quiz ({{ tracks.length }} / 50)</h2>
+      <ol class="tracks selected">
+        @for (control of tracks.controls; track control.value.trackId; let index = $index) {
+          <li class="track">
+            <span class="muted">{{ index + 1 }}</span>
+            @if (control.value.coverUrl) {
+              <img [src]="control.value.coverUrl" alt="" />
+            }
+            <div class="details">
+              <strong>{{ control.value.title }}</strong>
+              <span class="muted">{{ control.value.artist }}</span>
+              @if (!control.value.hasPreview) {
+                <span class="no-preview">pas d'extrait</span>
+              }
+            </div>
+            <div class="track-actions">
+              <button
+                class="button secondary up"
+                type="button"
+                [disabled]="index === 0"
+                (click)="moveTrack(index, -1)"
+              >
+                Monter
+              </button>
+              <button
+                class="button secondary down"
+                type="button"
+                [disabled]="index === tracks.length - 1"
+                (click)="moveTrack(index, 1)"
+              >
+                Descendre
+              </button>
+              <button class="button danger" type="button" (click)="removeTrack(index)">
+                Retirer
+              </button>
+            </div>
+          </li>
+        } @empty {
+          <li class="muted">Ajoute au moins un morceau pour enregistrer le quiz.</li>
+        }
+      </ol>
+    </div>
+
+    @for (message of errorMessages(); track message) {
+      <p class="message error">{{ message }}</p>
+    }
+
+    <div class="form-actions">
+      <button
+        mat-flat-button
+        type="submit"
+        form="quiz-form"
+        [disabled]="quizForm.invalid || saving()"
+      >
+        {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+      <a mat-button routerLink="/mes-quiz">Annuler</a>
+    </div>
+  }
+</section>

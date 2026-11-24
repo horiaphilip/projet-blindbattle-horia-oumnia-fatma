@@ -34,6 +34,7 @@ describe('Navigation', () => {
     expect(text).toContain('Connexion');
     expect(text).toContain('Classement');
     expect(text).not.toContain('Déconnexion');
+    expect(text).not.toContain('Mes quiz');
   });
 
   it('should show the name and Déconnexion when logged in', () => {
@@ -50,6 +51,7 @@ describe('Navigation', () => {
     expect(text).toContain('Ana');
     expect(text).toContain('Déconnexion');
     expect(text).toContain('Mon profil');
+    expect(text).toContain('Mes quiz');
   });
 
   it('should log out', () => {
