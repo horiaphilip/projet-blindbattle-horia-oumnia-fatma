@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "id": 4593731,
+      "name": "Angèle",
+      "link": "https://www.deezer.com/artist/4593731",
+      "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/4593731/250x250-000000-80-0-0.jpg",
+      "tracklist": "https://api.deezer.com/artist/4593731/top?limit=50",
+      "type": "artist",
+      "nb_album": 6,
+      "nb_fan": 1500000
+    },
+    {
+      "id": 75798,
+      "name": "Orelsan",
+      "link": "https://www.deezer.com/artist/75798",
+      "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/75798/250x250-000000-80-0-0.jpg",
+      "tracklist": "https://api.deezer.com/artist/75798/top?limit=50",
+      "type": "artist",
+      "nb_album": 9,
+      "nb_fan": 2300000
+    }
+  ],
+  "total": 2
+}

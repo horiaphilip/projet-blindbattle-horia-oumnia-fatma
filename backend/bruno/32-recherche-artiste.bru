@@ -1,0 +1,25 @@
+meta {
+  name: Rechercher un artiste
+  type: http
+  seq: 32
+}
+
+get {
+  url: {{baseUrl}}/artists/search?q=stromae
+}
+
+params:query {
+  q: stromae
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("conserver l'artiste trouvé", function () {
+    const artists = res.getBody();
+    bru.setEnvVar("artistId", artists[0].id);
+    expect(artists[0].name).to.equal("Stromae");
+  });
+}

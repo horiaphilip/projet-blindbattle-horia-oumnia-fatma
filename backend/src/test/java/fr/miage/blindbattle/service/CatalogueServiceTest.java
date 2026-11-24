@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CatalogueServiceTest {
-    private final CatalogueService catalogue = new CatalogueService(null);
+    private final CatalogueService catalogue = new CatalogueService(null, null, null);
     private final List<TrackEntity> tracks = IntStream.rangeClosed(1, 9)
             .mapToObj(i -> new TrackEntity(i, "Titre " + i, "Artiste " + i, i, "Album", null, i * 1000, 30, true)).toList();
 

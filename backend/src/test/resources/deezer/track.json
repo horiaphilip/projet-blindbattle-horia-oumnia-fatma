@@ -1,0 +1,38 @@
+{
+  "id": 3135556,
+  "readable": true,
+  "title": "Alors on danse",
+  "title_short": "Alors on danse",
+  "title_version": "",
+  "link": "https://www.deezer.com/track/3135556",
+  "duration": 206,
+  "rank": 912345,
+  "explicit_lyrics": false,
+  "explicit_content_lyrics": 0,
+  "preview": "https://cdnt-preview.dzcdn.net/api/1/1/3135556.mp3?hdnea=exp=1762344000~acl=/api/1/1/*~hmac=ab12",
+  "md5_image": "0a1b2c",
+  "artist": {
+    "id": 5542,
+    "name": "Stromae",
+    "link": "https://www.deezer.com/artist/5542",
+    "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/5542/250x250-000000-80-0-0.jpg",
+    "tracklist": "https://api.deezer.com/artist/5542/top?limit=50",
+    "type": "artist"
+  },
+  "album": {
+    "id": 302127,
+    "title": "Cheese",
+    "cover": "https://api.deezer.com/album/302127/image",
+    "cover_medium": "https://e-cdns-images.dzcdn.net/images/cover/302127/250x250-000000-80-0-0.jpg",
+    "md5_image": "0a1b2c",
+    "type": "album"
+  },
+  "type": "track",
+  "isrc": "BEP010900051",
+  "bpm": 120.0,
+  "gain": -8.7,
+  "available_countries": [
+    "FR",
+    "BE"
+  ]
+}

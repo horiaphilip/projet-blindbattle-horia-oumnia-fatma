@@ -1,0 +1,27 @@
+{
+  "data": [
+    {
+      "id": 5542,
+      "name": "Stromae",
+      "link": "https://www.deezer.com/artist/5542",
+      "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/5542/250x250-000000-80-0-0.jpg",
+      "tracklist": "https://api.deezer.com/artist/5542/top?limit=50",
+      "type": "artist",
+      "nb_album": 12,
+      "nb_fan": 4100000,
+      "radio": true
+    },
+    {
+      "id": 13719631,
+      "name": "Stromae & Pomme",
+      "link": "https://www.deezer.com/artist/13719631",
+      "picture_medium": "https://e-cdns-images.dzcdn.net/images/artist/13719631/250x250-000000-80-0-0.jpg",
+      "tracklist": "https://api.deezer.com/artist/13719631/top?limit=50",
+      "type": "artist",
+      "nb_album": 1,
+      "nb_fan": 1200,
+      "radio": false
+    }
+  ],
+  "total": 2
+}

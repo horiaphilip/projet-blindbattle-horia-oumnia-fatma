@@ -1,0 +1,23 @@
+meta {
+  name: Rechercher des morceaux
+  type: http
+  seq: 35
+}
+
+get {
+  url: {{baseUrl}}/tracks/search?q=stromae
+}
+
+params:query {
+  q: stromae
+}
+
+assert {
+  res.status: 200
+}
+
+tests {
+  test("indique les morceaux sans extrait", function () {
+    expect(res.getBody()[0]).to.have.property("hasPreview");
+  });
+}

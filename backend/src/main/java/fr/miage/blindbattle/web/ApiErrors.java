@@ -1,6 +1,8 @@
 package fr.miage.blindbattle.web;
 
 import fr.miage.blindbattle.game.NotEnoughTracks;
+import fr.miage.blindbattle.integration.deezer.DeezerTrackNotFound;
+import fr.miage.blindbattle.integration.deezer.DeezerUnavailable;
 import fr.miage.blindbattle.service.EmailAlreadyUsed;
 import fr.miage.blindbattle.service.GameAlreadyStarted;
 import fr.miage.blindbattle.service.GameNotFound;
@@ -13,7 +15,9 @@ import fr.miage.blindbattle.service.NotOwner;
 import fr.miage.blindbattle.service.NotQuizOwner;
 import fr.miage.blindbattle.service.PlayerNotFound;
 import fr.miage.blindbattle.service.QuizNotFound;
+import fr.miage.blindbattle.service.SearchTooShort;
 import fr.miage.blindbattle.service.StatsNotReady;
+import fr.miage.blindbattle.service.ThemeNotFound;
 import fr.miage.blindbattle.service.TrackNotFound;
 import fr.miage.blindbattle.service.TrackPoolTooSmall;
 import fr.miage.blindbattle.service.UserNotFound;
@@ -28,7 +32,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiErrors {
     @ExceptionHandler({UserNotFound.class, StatsNotReady.class, GameNotFound.class, QuizNotFound.class,
-            TrackNotFound.class, PlayerNotFound.class})
+            TrackNotFound.class, PlayerNotFound.class, DeezerTrackNotFound.class, ThemeNotFound.class})
     public ProblemDetail notFound(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, error.getMessage());
     }
@@ -47,6 +51,16 @@ public class ApiErrors {
     @ExceptionHandler({NotOwner.class, NotHost.class, NotQuizOwner.class})
     public ProblemDetail forbidden(RuntimeException error) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, error.getMessage());
+    }
+
+    @ExceptionHandler(DeezerUnavailable.class)
+    public ProblemDetail unavailable(DeezerUnavailable error) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, error.getMessage());
+    }
+
+    @ExceptionHandler(SearchTooShort.class)
+    public ProblemDetail badRequest(SearchTooShort error) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, error.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
