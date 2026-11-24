@@ -64,21 +64,80 @@
           <span class="value">{{ stats.bestScore }}</span>
           <span class="label">Meilleur score</span>
         </div>
+        <div class="card stat">
+          <span class="value">{{ averageScore() }}</span>
+          <span class="label">Score moyen par partie</span>
+        </div>
       </div>
 
       <div class="card">
         <h2>Badges</h2>
-        @for (badge of stats.badges; track badge.code) {
-          <div class="badge">
-            <strong>{{ badge.code | badgeLabel }}</strong>
-            <span class="muted">obtenu le {{ badge.earnedAt | date: 'dd/MM/yyyy' }}</span>
+        @if (stats.badges.length > 0) {
+          <div class="badges">
+            @for (badge of stats.badges; track badge.code) {
+              <div class="badge">
+                <strong>{{ badge.code | badgeLabel }}</strong>
+                <span class="muted">obtenu le {{ badge.earnedAt | date: 'dd/MM/yyyy' }}</span>
+              </div>
+            }
           </div>
-        } @empty {
+        } @else {
           <p class="muted">Aucun badge pour le moment.</p>
         }
       </div>
     } @else {
       <p class="message info">Création de ton profil de joueur en cours...</p>
     }
+
+    @if (recentGames().length > 0) {
+      <div class="card">
+        <h2>Score des dernières parties</h2>
+        <app-score-chart [entries]="recentGames()"></app-score-chart>
+      </div>
+    }
+
+    <div class="card">
+      <h2>Historique des parties</h2>
+      @if (historyError()) {
+        <p class="message error">Impossible de charger l'historique.</p>
+      }
+      @if (history(); as history) {
+        @if (history.content.length > 0) {
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Code</th>
+                <th scope="col">Rang</th>
+                <th scope="col">Score</th>
+                <th scope="col">Réponses</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of history.content; track entry.gameCode) {
+                <tr>
+                  <td data-label="Date">{{ entry.playedAt | date: 'dd/MM/yyyy' }}</td>
+                  <td data-label="Code">{{ entry.gameCode }}</td>
+                  <td data-label="Rang">{{ rankLabel(entry.rank) }} / {{ entry.playerCount }}</td>
+                  <td data-label="Score">{{ entry.finalScore }}</td>
+                  <td data-label="Réponses">
+                    {{ entry.correctAnswers }} / {{ entry.totalRounds }} bonnes réponses
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <app-pagination
+            [page]="history.page"
+            [totalPages]="history.totalPages"
+            (pageChange)="loadHistory(user.id, $event)"
+          ></app-pagination>
+        } @else {
+          <p class="muted">Aucune partie jouée pour l'instant</p>
+        }
+      } @else if (!historyError()) {
+        <p class="message info">Chargement de l'historique...</p>
+      }
+    </div>
   }
 </section>

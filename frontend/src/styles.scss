@@ -122,3 +122,58 @@ a {
     color: var(--secondary);
   }
 }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--surface-light);
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    overflow-wrap: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .table {
+    &,
+    tbody,
+    tr {
+      display: block;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tr {
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border: 1px solid var(--surface-light);
+      border-radius: 10px;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 6px 0;
+      border: none;
+      text-align: right;
+
+      &::before {
+        content: attr(data-label);
+        color: var(--muted);
+        overflow-wrap: normal;
+      }
+    }
+  }
+}

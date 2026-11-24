@@ -1,0 +1,66 @@
+<section class="page">
+  <h1>Classement</h1>
+
+  @if (error()) {
+    <p class="message error">Impossible de charger le classement.</p>
+  }
+
+  @if (leaderboard(); as leaderboard) {
+    @if (podium().length > 0) {
+      <ol class="podium">
+        @for (entry of podium(); track entry.userId; let index = $index) {
+          <li class="card step" [class]="'place-' + (index + 1)" [class.me]="isMe(entry)">
+            <span class="place">{{ index + 1 }}</span>
+            <a [routerLink]="['/profil', entry.userId]">{{ entry.name }}</a>
+            <span class="score">{{ entry.totalScore }} pts</span>
+          </li>
+        }
+      </ol>
+    }
+
+    @if (leaderboard.content.length > 0) {
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Rang</th>
+              <th scope="col">Joueur</th>
+              <th scope="col">Parties</th>
+              <th scope="col">Victoires</th>
+              <th scope="col">Score total</th>
+              <th scope="col">Meilleur score</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of leaderboard.content; track entry.userId; let index = $index) {
+              <tr [class.me]="isMe(entry)">
+                <td data-label="Rang">{{ rank(leaderboard, index) }}</td>
+                <td data-label="Joueur">
+                  <span>
+                    <a [routerLink]="['/profil', entry.userId]">{{ entry.name }}</a>
+                    @if (isMe(entry)) {
+                      <span class="me-label">Toi</span>
+                    }
+                  </span>
+                </td>
+                <td data-label="Parties">{{ entry.gamesPlayed }}</td>
+                <td data-label="Victoires">{{ entry.wins }}</td>
+                <td data-label="Score total">{{ entry.totalScore }}</td>
+                <td data-label="Meilleur score">{{ entry.bestScore }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <app-pagination
+          [page]="leaderboard.page"
+          [totalPages]="leaderboard.totalPages"
+          (pageChange)="loadPage($event)"
+        ></app-pagination>
+      </div>
+    } @else {
+      <p class="muted">Aucune partie jouée pour l'instant.</p>
+    }
+  } @else if (!error()) {
+    <p class="message info">Chargement du classement...</p>
+  }
+</section>
