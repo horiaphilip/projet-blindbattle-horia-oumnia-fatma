@@ -1,0 +1,16 @@
+<ol class="scoreboard">
+  @for (standing of visible(); track standing.playerId; let index = $index) {
+    <li class="row" [class.me]="standing.playerId === highlight" [class.podium]="index < 3">
+      <span class="rank">{{ index + 1 }}</span>
+      <span class="nickname">{{ standing.nickname }}</span>
+      @if (showPoints && standing.answered !== undefined) {
+        <span class="points" [class.correct]="standing.correct">
+          {{ standing.correct ? '+' + standing.points : standing.answered ? '✗' : '–' }}
+        </span>
+      }
+      <strong class="score">{{ standing.score }}</strong>
+    </li>
+  } @empty {
+    <li class="muted">Aucun joueur.</li>
+  }
+</ol>

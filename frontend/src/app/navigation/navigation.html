@@ -6,7 +6,9 @@
     >
     <a routerLink="joueurs" routerLinkActive="active">Joueurs</a>
     <a routerLink="classement" routerLinkActive="active">Classement</a>
+    <a routerLink="rejoindre" routerLinkActive="active">Rejoindre</a>
     @if (authService.currentUser(); as user) {
+      <a routerLink="partie/nouvelle" routerLinkActive="active">Créer une partie</a>
       <a routerLink="mes-quiz" routerLinkActive="active">Mes quiz</a>
       <a routerLink="profil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         >Mon profil</a

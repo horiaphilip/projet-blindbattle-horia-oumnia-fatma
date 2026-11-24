@@ -1,0 +1,124 @@
+<section class="page">
+  <audio #audio preload="auto"></audio>
+
+  @if (errorMessage()) {
+    <p class="message error">{{ errorMessage() }}</p>
+  }
+
+  @if (game(); as game) {
+    @switch (status()) {
+      @case ('LOBBY') {
+        <div class="lobby">
+          <div class="card join">
+            <p class="muted">Rejoins la partie sur</p>
+            <a class="join-url" [href]="joinUrl()" target="_blank">{{ joinUrl() }}</a>
+            <p class="muted">avec le code</p>
+            <p class="code">{{ code }}</p>
+            @if (qrCode()) {
+              <img class="qr" [src]="qrCode()" alt="QR code pour rejoindre la partie" />
+            }
+          </div>
+          <div class="card players">
+            <h2>Joueurs ({{ players().length }})</h2>
+            <ul>
+              @for (player of players(); track player.playerId) {
+                <li>
+                  {{ player.nickname }}
+                  @if (player.guest) {
+                    <span class="muted">invité</span>
+                  }
+                </li>
+              } @empty {
+                <li class="muted">En attente des joueurs...</li>
+              }
+            </ul>
+            <button
+              class="button start"
+              type="button"
+              [disabled]="players().length === 0 || starting()"
+              (click)="start()"
+            >
+              {{ starting() ? 'Démarrage...' : 'Démarrer la partie' }}
+            </button>
+          </div>
+        </div>
+      }
+      @case ('PLAYING') {
+        <div class="header">
+          <h1>
+            Manche {{ round()?.roundNumber ?? '…' }} /
+            {{ round()?.totalRounds ?? game.settings.roundCount }}
+          </h1>
+          <span class="muted">Code {{ code }}</span>
+        </div>
+
+        @if (reveal(); as reveal) {
+          <div class="card reveal">
+            @if (reveal.coverUrl) {
+              <img [src]="reveal.coverUrl" alt="" />
+            }
+            <div class="details">
+              <p class="muted">C'était</p>
+              <h2>{{ reveal.title }}</h2>
+              <p class="artist">{{ reveal.artist }}</p>
+              @if (reveal.fastest) {
+                <p class="fastest">⚡ Plus rapide : {{ reveal.fastest }}</p>
+              }
+            </div>
+          </div>
+          <div class="card">
+            <h2>Classement</h2>
+            <app-scoreboard [standings]="standings()" [showPoints]="true"></app-scoreboard>
+          </div>
+          <p class="muted next">Manche suivante dans quelques secondes...</p>
+        } @else {
+          <div class="card playing">
+            <app-countdown
+              [endsAt]="endsAt()"
+              [totalSeconds]="game.settings.roundSeconds"
+            ></app-countdown>
+            <div class="equalizer" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            @if (audioBlocked()) {
+              <button class="button play" type="button" (click)="playPreview()">
+                Lancer l'extrait
+              </button>
+            }
+            @if (round()?.choices?.length) {
+              <ol class="choices">
+                @for (choice of round()!.choices; track $index) {
+                  <li class="choice-{{ $index }}">{{ choice }}</li>
+                }
+              </ol>
+            }
+            <p class="answered">
+              {{ answers()?.answered ?? 0 }} / {{ answers()?.players ?? players().length }} réponses
+            </p>
+          </div>
+        }
+      }
+      @case ('FINISHED') {
+        <h1>Partie terminée</h1>
+        <div class="podium">
+          @for (standing of standings().slice(0, 3); track standing.playerId; let index = $index) {
+            <div class="step step-{{ index + 1 }}">
+              <span class="medal">{{ index + 1 }}</span>
+              <strong>{{ standing.nickname }}</strong>
+              <span>{{ standing.score }} pts</span>
+            </div>
+          }
+        </div>
+        <div class="card">
+          <app-scoreboard [standings]="standings()"></app-scoreboard>
+        </div>
+        <div class="actions">
+          <a class="button" routerLink="/partie/nouvelle">Nouvelle partie</a>
+          <a class="button secondary" routerLink="/classement">Classement général</a>
+        </div>
+      }
+    }
+  } @else if (!errorMessage()) {
+    <p class="message info">Chargement de la partie...</p>
+  }
+</section>

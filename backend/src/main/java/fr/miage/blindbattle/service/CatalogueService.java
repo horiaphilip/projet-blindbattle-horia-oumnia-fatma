@@ -73,7 +73,6 @@ public class CatalogueService {
     }
 
     private List<DeezerTrack> deezerTracks(String themeId) {
-        if (ThemeCatalog.WORLD_CHART.equals(themeId)) return deezer.chartTracks(100);
         if (themeId.startsWith(ThemeCatalog.ARTIST_PREFIX)) return deezer.artistTop(artistId(themeId));
         Theme theme = catalog.find(themeId).orElseThrow(() -> new ThemeNotFound(themeId));
         return deezer.playlistTracks(theme.playlistId());

@@ -1,0 +1,4 @@
+<div class="countdown" [class.urgent]="remaining() <= 5">
+  <span class="seconds">{{ remaining() }}</span>
+  <div class="bar"><div class="fill" [style.width.%]="percent()"></div></div>
+</div>

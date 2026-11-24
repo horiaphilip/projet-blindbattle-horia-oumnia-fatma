@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,7 +39,6 @@ class CatalogueApiTest {
 
     @Test void listThemes() throws Exception {
         when(deezer.playlistTracks(anyLong())).thenReturn(nine(100));
-        when(deezer.chartTracks(anyInt())).thenReturn(nine(200));
         mvc.perform(get("/themes"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(9)))

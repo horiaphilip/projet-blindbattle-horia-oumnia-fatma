@@ -1,5 +1,6 @@
 package fr.miage.blindbattle.service;
 
+import fr.miage.blindbattle.domain.AnswerEntity;
 import fr.miage.blindbattle.domain.GameEntity;
 import fr.miage.blindbattle.domain.GameSettings;
 import fr.miage.blindbattle.domain.GameStatus;
@@ -93,7 +94,7 @@ public class RoundService {
         data.put("artist", track.getArtist());
         data.put("coverUrl", track.getCoverUrl());
         data.put("fastest", fastest);
-        data.put("leaderboard", leaderboard(game));
+        data.put("leaderboard", leaderboard(game, roundId));
         events.publishEvent(GameEvent.of(GameEventType.ROUND_ENDED, game.getCode(), data));
         scheduler.nextRoundAfterPause(game.getCode());
     }
@@ -117,5 +118,16 @@ public class RoundService {
         return players.findByGameIdOrderByScoreDescJoinedAtAsc(game.getId()).stream()
                 .map(p -> Map.<String, Object>of("playerId", p.getId(), "nickname", p.getNickname(), "score", p.getScore()))
                 .toList();
+    }
+
+    private List<Map<String, Object>> leaderboard(GameEntity game, long roundId) {
+        Map<Long, AnswerEntity> byPlayer = answers.findByRoundIdAndRejectedReasonIsNull(roundId).stream()
+                .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
+        return players.findByGameIdOrderByScoreDescJoinedAtAsc(game.getId()).stream().map(p -> {
+            AnswerEntity answer = byPlayer.get(p.getId());
+            return Map.<String, Object>of("playerId", p.getId(), "nickname", p.getNickname(), "score", p.getScore(),
+                    "answered", answer != null, "correct", answer != null && answer.getCorrectness() > 0,
+                    "points", answer == null ? 0 : answer.getPoints(), "streak", p.getStreak());
+        }).toList();
     }
 }

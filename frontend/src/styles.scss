@@ -47,6 +47,11 @@ a {
   color: var(--secondary);
 }
 
+select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
 .page {
   max-width: 960px;
   margin: 0 auto;

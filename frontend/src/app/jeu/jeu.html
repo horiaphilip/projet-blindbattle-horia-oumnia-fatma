@@ -1,0 +1,91 @@
+<section class="page">
+  <div class="header">
+    <strong>{{ player?.nickname }}</strong>
+    <span class="muted">Partie {{ code }}</span>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="message error">{{ errorMessage() }}</p>
+  }
+
+  @if (settings(); as settings) {
+    @switch (status()) {
+      @case ('LOBBY') {
+        <div class="card waiting">
+          <h1>Tu es dans la partie !</h1>
+          <p class="muted">
+            {{ playerCount() }} {{ playerCount() > 1 ? 'joueurs' : 'joueur' }} · en attente de
+            l'animateur...
+          </p>
+        </div>
+      }
+      @case ('PLAYING') {
+        @if (reveal(); as reveal) {
+          <div class="card result" [class.correct]="me()?.correct" [class.wrong]="!me()?.correct">
+            @if (me()?.correct) {
+              <h1>Bravo ! +{{ me()?.points }}</h1>
+              @if ((me()?.streak ?? 0) > 1) {
+                <p class="streak">🔥 Série de {{ me()?.streak }}</p>
+              }
+            } @else if (me()?.answered) {
+              <h1>Raté...</h1>
+            } @else {
+              <h1>Trop tard !</h1>
+            }
+            <p>
+              C'était <strong>{{ reveal.title }}</strong> – {{ reveal.artist }}
+            </p>
+            <p class="rank">
+              {{ rank() }}<sup>{{ rank() === 1 ? 'er' : 'e' }}</sup> · {{ me()?.score ?? 0 }} pts
+            </p>
+          </div>
+        } @else if (round(); as round) {
+          <p class="muted round">Manche {{ round.roundNumber }} / {{ round.totalRounds }}</p>
+          <app-countdown [endsAt]="endsAt()" [totalSeconds]="settings.roundSeconds"></app-countdown>
+          @if (sent()) {
+            <div class="card waiting">
+              <h1>Réponse envoyée</h1>
+              <p class="muted">Résultat à la fin de la manche...</p>
+            </div>
+          } @else {
+            <app-answer-pad
+              [mode]="settings.answerMode"
+              [guessTarget]="settings.guessTarget"
+              [choices]="round.choices"
+              [disabled]="sent()"
+              (answer)="answer($event)"
+            ></app-answer-pad>
+          }
+        } @else {
+          <div class="card waiting">
+            <h1>Manche en cours</h1>
+            <p class="muted">Tu joueras dès la prochaine manche.</p>
+          </div>
+        }
+      }
+      @case ('FINISHED') {
+        <div class="card result final">
+          <h1>Partie terminée</h1>
+          @if (rank() > 0) {
+            <p class="rank">
+              {{ rank() }}<sup>{{ rank() === 1 ? 'er' : 'e' }}</sup> sur {{ standings().length }} ·
+              {{ me()?.score ?? 0 }} pts
+            </p>
+          }
+        </div>
+        <div class="card">
+          <app-scoreboard
+            [standings]="standings()"
+            [highlight]="player?.playerId ?? null"
+          ></app-scoreboard>
+        </div>
+        <div class="actions">
+          <a class="button" routerLink="/rejoindre">Rejoindre une autre partie</a>
+          <a class="button secondary" routerLink="/classement">Classement général</a>
+        </div>
+      }
+    }
+  } @else if (!errorMessage()) {
+    <p class="message info">Connexion à la partie...</p>
+  }
+</section>

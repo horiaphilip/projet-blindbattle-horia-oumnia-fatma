@@ -81,7 +81,8 @@ class GameStreamTest {
         }
         await().atMost(Duration.ofSeconds(10)).until(() -> games.findByCode(code).orElseThrow().getStatus() == GameStatus.FINISHED);
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> assertThat(content(stream))
-                .contains("event:ROUND_ENDED").contains("Morceau").contains("event:GAME_FINISHED"));
+                .contains("event:ROUND_ENDED").contains("Morceau").contains("\"answered\":false")
+                .contains("\"points\":0").contains("event:GAME_FINISHED"));
         mvc.perform(get("/games/" + code + "/state")).andExpect(jsonPath("$.status").value("FINISHED"))
             .andExpect(jsonPath("$.currentRound").value(3));
     }

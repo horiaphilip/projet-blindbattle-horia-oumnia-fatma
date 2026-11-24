@@ -1,0 +1,52 @@
+.scoreboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: var(--surface-light);
+
+  &.me {
+    outline: 2px solid var(--secondary);
+  }
+
+  &.podium .rank {
+    color: var(--primary);
+  }
+}
+
+.rank {
+  min-width: 2ch;
+  font-weight: 800;
+}
+
+.nickname {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.points {
+  color: var(--muted);
+
+  &.correct {
+    color: var(--success);
+    font-weight: 700;
+  }
+}
+
+.score {
+  min-width: 5ch;
+  text-align: right;
+}
+
+.muted {
+  color: var(--muted);
+}

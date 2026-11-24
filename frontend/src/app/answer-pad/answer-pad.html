@@ -1,0 +1,34 @@
+<div class="pad">
+  <p class="question">{{ question() }}</p>
+  @if (mode === 'QUICK_CHOICE') {
+    <div class="choices">
+      @for (choice of choices; track $index) {
+        <button
+          class="choice choice-{{ $index }}"
+          type="button"
+          [disabled]="disabled"
+          (click)="choose($index)"
+        >
+          {{ choice }}
+        </button>
+      }
+    </div>
+  } @else {
+    <form class="typed" #answerForm="ngForm" (ngSubmit)="onSubmit(answerForm)" novalidate>
+      <input
+        type="text"
+        name="text"
+        autocomplete="off"
+        maxlength="200"
+        placeholder="Ta réponse"
+        [(ngModel)]="text"
+        [disabled]="disabled"
+        required
+        pattern=".*\S.*"
+      />
+      <button class="button" type="submit" [disabled]="answerForm.invalid || disabled">
+        Valider
+      </button>
+    </form>
+  }
+</div>

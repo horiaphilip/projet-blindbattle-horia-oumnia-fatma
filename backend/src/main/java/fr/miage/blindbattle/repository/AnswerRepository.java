@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface AnswerRepository extends JpaRepository<AnswerEntity, Long> {
     boolean existsByRoundIdAndPlayerId(Long roundId, Long playerId);
     long countByRoundId(Long roundId);
+    List<AnswerEntity> findByRoundIdAndRejectedReasonIsNull(Long roundId);
     Optional<AnswerEntity> findFirstByRoundIdAndCorrectnessGreaterThanOrderByResponseMsAsc(Long roundId, double correctness);
 
     @Query("select a.player.id from AnswerEntity a where a.round.id = :roundId")

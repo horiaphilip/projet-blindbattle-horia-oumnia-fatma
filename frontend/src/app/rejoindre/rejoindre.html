@@ -1,0 +1,52 @@
+<section class="page">
+  <div class="card form-card">
+    <h1>Rejoindre une partie</h1>
+    <form #joinForm="ngForm" (ngSubmit)="onSubmit(joinForm)" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>Code de la partie</mat-label>
+        <input
+          matInput
+          class="code"
+          type="text"
+          name="code"
+          autocomplete="off"
+          autocapitalize="characters"
+          maxlength="6"
+          [(ngModel)]="code"
+          #codeField="ngModel"
+          required
+          pattern="[A-Za-z0-9]{6}"
+        />
+        @if (codeField.touched && codeField.hasError('required')) {
+          <mat-error>Le code est obligatoire</mat-error>
+        }
+        @if (codeField.touched && codeField.hasError('pattern')) {
+          <mat-error>Le code contient 6 caractères</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Pseudo</mat-label>
+        <input
+          matInput
+          type="text"
+          name="nickname"
+          autocomplete="nickname"
+          maxlength="20"
+          [(ngModel)]="nickname"
+          #nicknameField="ngModel"
+          required
+          pattern=".*\S.*"
+        />
+        @if (nicknameField.touched && nicknameField.invalid) {
+          <mat-error>Le pseudo est obligatoire (20 caractères maximum)</mat-error>
+        }
+      </mat-form-field>
+      @if (errorMessage()) {
+        <p class="message error">{{ errorMessage() }}</p>
+      }
+      <button mat-flat-button type="submit" [disabled]="joinForm.invalid || sending()">
+        {{ sending() ? 'Connexion...' : 'Jouer' }}
+      </button>
+    </form>
+  </div>
+</section>

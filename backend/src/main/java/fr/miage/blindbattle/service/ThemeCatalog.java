@@ -10,7 +10,7 @@ public class ThemeCatalog {
     public static final String ARTIST_PREFIX = "artist-";
 
     private final List<Theme> themes = List.of(
-            new Theme(WORLD_CHART, "Top Monde", "Classements", 0),
+            new Theme(WORLD_CHART, "Top Monde", "Classements", 3155776842L),
             new Theme("chart-fr", "Top France", "Classements", 1109890291L),
             new Theme("genre-rap", "Rap", "Genres", 1071669561L),
             new Theme("genre-rock", "Rock", "Genres", 3126664682L),

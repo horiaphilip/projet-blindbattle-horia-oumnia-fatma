@@ -1,0 +1,102 @@
+<section class="page">
+  <h1>Nouvelle partie</h1>
+  <form class="card form" [formGroup]="gameForm" (ngSubmit)="onSubmit()">
+    <div class="sources" role="radiogroup" aria-label="Musique">
+      <label [class.selected]="!isQuiz()">
+        <input type="radio" formControlName="source" value="THEME" />
+        Un thème
+      </label>
+      <label [class.selected]="isQuiz()">
+        <input type="radio" formControlName="source" value="QUIZ" />
+        Un de mes quiz
+      </label>
+    </div>
+
+    @if (isQuiz()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Quiz</mat-label>
+        <mat-select formControlName="quizId" placeholder="Choisis un quiz">
+          @for (quiz of quizzes(); track quiz.id) {
+            <mat-option [value]="quiz.id"
+              >{{ quiz.title }} · {{ quiz.trackCount }} morceaux</mat-option
+            >
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (quizzes().length === 0) {
+        <p class="muted">
+          Tu n'as pas encore de quiz. <a routerLink="/quiz/nouveau">Créer un quiz</a>
+        </p>
+      }
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Thème</mat-label>
+        <mat-select formControlName="themeId">
+          @for (theme of themes(); track theme.id) {
+            <mat-option [value]="theme.id">{{ theme.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Difficulté</mat-label>
+        <mat-select formControlName="difficulty">
+          <mat-option value="EASY">Facile</mat-option>
+          <mat-option value="HARD">Difficile</mat-option>
+        </mat-select>
+        <mat-hint>{{
+          gameForm.controls.difficulty.value === 'EASY'
+            ? 'Les morceaux les plus populaires du thème'
+            : 'Les morceaux moins connus du thème'
+        }}</mat-hint>
+      </mat-form-field>
+    }
+
+    <div class="row">
+      <mat-form-field appearance="outline">
+        <mat-label>Mode de réponse</mat-label>
+        <mat-select formControlName="answerMode">
+          <mat-option value="QUICK_CHOICE">Choix rapide</mat-option>
+          <mat-option value="TYPE_IT">Réponse libre</mat-option>
+        </mat-select>
+        <mat-hint>{{
+          gameForm.controls.answerMode.value === 'QUICK_CHOICE'
+            ? "4 propositions à l'écran"
+            : 'Les joueurs tapent leur réponse'
+        }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>À deviner</mat-label>
+        <mat-select formControlName="guessTarget">
+          <mat-option value="TITLE">Le titre</mat-option>
+          <mat-option value="ARTIST">L'artiste</mat-option>
+          <mat-option value="BOTH">Titre et artiste</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="row">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre de manches</mat-label>
+        <input matInput type="number" min="3" max="20" formControlName="roundCount" />
+        @if (gameForm.controls.roundCount.invalid) {
+          <mat-error>Entre 3 et 20 manches</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Secondes par manche</mat-label>
+        <input matInput type="number" min="10" max="30" formControlName="roundSeconds" />
+        @if (gameForm.controls.roundSeconds.invalid) {
+          <mat-error>Entre 10 et 30 secondes</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    @for (message of errorMessages(); track message) {
+      <p class="message error">{{ message }}</p>
+    }
+
+    <button mat-flat-button type="submit" [disabled]="gameForm.invalid || sending()">
+      {{ sending() ? 'Création...' : 'Créer la partie' }}
+    </button>
+  </form>
+</section>
